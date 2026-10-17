@@ -1384,13 +1384,26 @@ body.bg-canvas {
 }
 
 @media (min-width: 1025px) {
-  .leads-table td:nth-child(2),
-  .leads-table td:nth-child(3),
-  .leads-table td:nth-child(4) {
+  #leads-table-body td:nth-child(2),
+  #leads-table-body td:nth-child(3),
+  #leads-table-body td:nth-child(4) {
     white-space: normal;
     word-break: break-word;
     max-width: 180px;
   }
+}
+
+/* Ensure currency and amount values never wrap across tables and drawers */
+.cell-amount,
+.col-amount,
+.leads-table .cell-amount,
+.leads-table td.cell-amount,
+.dd-item-amount,
+.rollup-val,
+#quotations-table-body td:nth-child(5),
+#deals-table-body td:nth-child(4),
+#payments-table-body td:nth-child(4) {
+  white-space: nowrap !important;
 }
 
 .leads-table tbody tr {
@@ -1962,20 +1975,27 @@ body.bg-canvas {
 
   .filter-bar-container {
     width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
   }
 
   .filter-presets {
-    width: 100%;
+    flex: 1;
+    min-width: 0;
+    width: auto;
     justify-content: space-between;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+    padding: 3px;
   }
 
   .filter-preset-btn {
-    padding: 0.4rem 0.65rem;
-    font-size: 0.75rem;
+    padding: 0.38rem 0.45rem;
+    font-size: 0.72rem;
     flex: 1;
+    min-width: 0;
     text-align: center;
+    white-space: nowrap;
   }
 
   .custom-range-panel {
@@ -2041,13 +2061,34 @@ body.bg-canvas {
   }
 }
 
+@media (max-width: 480px) {
+  .dashboard-header {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .filter-bar-container {
+    gap: 0.35rem;
+  }
+
+  .filter-presets {
+    padding: 2.5px;
+  }
+
+  .filter-preset-btn {
+    padding: 0.35rem 0.28rem;
+    font-size: 0.69rem;
+    letter-spacing: -0.015em;
+  }
+}
+
 @media (max-width: 360px) {
   .view-title {
     font-size: 1.15rem;
   }
   .filter-preset-btn {
-    padding: 0.35rem 0.45rem;
-    font-size: 0.7rem;
+    padding: 0.32rem 0.18rem;
+    font-size: 0.64rem;
+    letter-spacing: -0.02em;
   }
 }
 
@@ -2171,6 +2212,18 @@ body.bg-canvas {
 [data-theme="dark"] .dashboard-header {
   background: rgba(15, 23, 42, 0.78);
   border-bottom-color: var(--border-subtle);
+}
+
+[data-theme="dark"] .hamburger-btn {
+  background: rgba(30, 41, 59, 0.85);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .hamburger-btn:hover {
+  background: rgba(51, 65, 85, 0.95);
+  border-color: var(--border-focus);
 }
 
 [data-theme="dark"] .filter-presets {

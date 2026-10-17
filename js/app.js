@@ -869,7 +869,7 @@
             <td>${leadName}</td>
             <td>${q.service}</td>
             <td>${q.category}</td>
-            <td><strong>${formatCurrencyINR(q.amount)}</strong></td>
+            <td class="cell-amount"><strong class="cell-amount">${formatCurrencyINR(q.amount)}</strong></td>
             <td><span class="status-badge badge-${q.status.toLowerCase()}">${q.status}</span></td>
             <td>${formatDate(q.createdAt)}</td>
             <td style="text-align: right;">
@@ -924,7 +924,7 @@
             <td><strong style="color: #6366f1;">${d.id}</strong></td>
             <td>${leadCompany}</td>
             <td>${d.service}</td>
-            <td><strong>${formatCurrencyINR(d.value)}</strong></td>
+            <td class="cell-amount"><strong class="cell-amount">${formatCurrencyINR(d.value)}</strong></td>
             <td><span class="priority-chip priority-${d.priority.toLowerCase()}">${d.priority}</span></td>
             <td><span class="status-badge badge-${d.status.toLowerCase().replace(' ', '-')}">${d.status}</span></td>
             <td style="min-width: 140px;">
@@ -987,7 +987,7 @@
             <td><strong style="color: #6366f1;">${p.id}</strong></td>
             <td>${p.dealId}</td>
             <td>${p.orderId || '—'}</td>
-            <td><strong class="text-success">${formatCurrencyINR(p.amount)}</strong></td>
+            <td class="cell-amount"><strong class="text-success cell-amount">${formatCurrencyINR(p.amount)}</strong></td>
             <td>${p.method}</td>
             <td><span class="status-badge badge-${p.status.toLowerCase()}">${p.status}</span></td>
             <td>${formatDate(p.date)}</td>
