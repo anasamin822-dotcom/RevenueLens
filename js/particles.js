@@ -30,6 +30,9 @@
     return (theme || getTheme()) === 'dark' ? DARK_PALETTE : LIGHT_PALETTE;
   }
 
+  // Module-scoped palette updated on theme changes
+  let PALETTE = getActivePalette();
+
   // Helper: check reduced motion
   function isReducedMotion() {
     return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -88,10 +91,9 @@
 
     createParticles() {
       const count = this.getTargetCount();
-      const palette = getActivePalette(this.theme);
       this.particles = [];
       for (let i = 0; i < count; i++) {
-        const color = palette[Math.floor(Math.random() * palette.length)];
+        const color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
         this.particles.push({
           x: Math.random() * this.width,
           y: Math.random() * this.height,
@@ -262,10 +264,10 @@
 
     setTheme(theme) {
       this.theme = theme;
+      PALETTE = getActivePalette(theme);
       this.lineColor = theme === 'dark' ? '129, 140, 248' : '99, 102, 241';
-      const palette = getActivePalette(theme);
       this.particles.forEach(p => {
-        p.color = palette[Math.floor(Math.random() * palette.length)];
+        p.color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
       });
       if (isReducedMotion()) {
         this.renderStaticFrame();
@@ -343,10 +345,9 @@
 
     createBurstParticles() {
       const count = window.innerWidth < 768 ? 16 : 28;
-      const palette = getActivePalette(this.theme);
       this.particles = [];
       for (let i = 0; i < count; i++) {
-        const color = palette[i % palette.length];
+        const color = PALETTE[i % PALETTE.length];
         this.particles.push({
           x: Math.random() * this.width,
           y: Math.random() * this.height,
@@ -396,12 +397,11 @@
       const rect = this.card.getBoundingClientRect();
       const originX = clientX - rect.left;
       const originY = clientY - rect.top;
-      const palette = getActivePalette(this.theme);
 
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 1.0 + Math.random() * 2.2;
-        const color = palette[Math.floor(Math.random() * palette.length)];
+        const color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
 
         this.particles.push({
           x: originX,
@@ -492,10 +492,10 @@
 
     setTheme(theme) {
       this.theme = theme;
+      PALETTE = getActivePalette(theme);
       this.lineColor = theme === 'dark' ? '192, 132, 252' : '139, 92, 246';
-      const palette = getActivePalette(theme);
       this.particles.forEach(p => {
-        p.color = palette[Math.floor(Math.random() * palette.length)];
+        p.color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
       });
     }
 
@@ -533,6 +533,7 @@
   }
 
   function setParticleTheme(theme) {
+    PALETTE = getActivePalette(theme);
     if (global.ambientParticles && typeof global.ambientParticles.setTheme === 'function') {
       global.ambientParticles.setTheme(theme);
     }
