@@ -11,18 +11,24 @@
 
   // Global Chart.js Defaults
   if (typeof Chart !== 'undefined') {
-    Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
+    Chart.defaults.font.family = "'Outfit', -apple-system, BlinkMacSystemFont, sans-serif";
     Chart.defaults.font.size = 12;
-    Chart.defaults.color = '#64748b';
-    Chart.defaults.plugins.tooltip.backgroundColor = '#0f172a';
+    Chart.defaults.color = '#475569';
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.94)';
     Chart.defaults.plugins.tooltip.titleColor = '#ffffff';
-    Chart.defaults.plugins.tooltip.bodyColor = '#e2e8f0';
+    Chart.defaults.plugins.tooltip.bodyColor = '#f8fafc';
+    Chart.defaults.plugins.tooltip.borderColor = 'rgba(255, 255, 255, 0.15)';
+    Chart.defaults.plugins.tooltip.borderWidth = 1;
     Chart.defaults.plugins.tooltip.padding = 10;
     Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    Chart.defaults.plugins.tooltip.titleFont = { family: "'Outfit', sans-serif", weight: '600' };
+    Chart.defaults.plugins.tooltip.bodyFont = { family: "'JetBrains Mono', monospace" };
     Chart.defaults.plugins.legend.labels.usePointStyle = true;
     Chart.defaults.plugins.legend.labels.boxWidth = 8;
     Chart.defaults.plugins.legend.labels.boxHeight = 8;
     Chart.defaults.plugins.legend.labels.padding = 14;
+    Chart.defaults.plugins.legend.labels.color = '#334155';
+    Chart.defaults.plugins.legend.labels.font = { family: "'Outfit', sans-serif", weight: '500' };
   }
 
   // --- Palette & Theme Constants ---
@@ -41,8 +47,8 @@
     roseLight: 'rgba(244, 63, 94, 0.14)',
     pink: '#ec4899',
     pinkLight: 'rgba(236, 72, 153, 0.14)',
-    slate: '#94a3b8',
-    grid: 'rgba(226, 232, 240, 0.65)'
+    slate: '#64748b',
+    grid: 'rgba(226, 232, 240, 0.75)'
   };
 
   const SOURCE_COLORS = {

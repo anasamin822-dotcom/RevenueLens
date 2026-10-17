@@ -156,6 +156,20 @@
     });
   }
 
+  // --- Ambient Aurora Visibility & Performance Governor ---
+  function initAuroraGovernor() {
+    const auroraWrap = document.querySelector('.ambient-aurora-wrap');
+    if (!auroraWrap) return;
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        auroraWrap.classList.add('aurora-paused');
+      } else {
+        auroraWrap.classList.remove('aurora-paused');
+      }
+    });
+  }
+
   // --- Navigation & View Tab Switcher ---
   function initNavigation() {
     const sidebar = document.getElementById('app-sidebar');
@@ -712,6 +726,7 @@
     initFilterBar();
     initNavigation();
     initSpotlightCards();
+    initAuroraGovernor();
     initTableFilterListeners();
 
     // 5. Initial Render

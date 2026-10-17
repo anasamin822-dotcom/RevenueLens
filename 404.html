@@ -8,7 +8,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <style>
     .error-container {
@@ -17,24 +17,28 @@
       align-items: center;
       justify-content: center;
       padding: 2rem;
+      position: relative;
+      z-index: 1;
     }
     .error-card {
       max-width: 520px;
       width: 100%;
       text-align: center;
       padding: 3.5rem 2rem;
-      background: #ffffff;
-      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-glass);
       border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-hover);
+      box-shadow: var(--shadow-glass);
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 1.25rem;
     }
     .error-code {
-      font-family: var(--font-display);
-      font-size: 4.5rem;
+      font-family: var(--font-mono);
+      font-size: 5rem;
       font-weight: 800;
       line-height: 1;
       background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
@@ -74,6 +78,12 @@
   </style>
 </head>
 <body class="bg-canvas">
+  <div class="ambient-aurora-wrap" aria-hidden="true">
+    <div class="aurora-blob aurora-blob-1"></div>
+    <div class="aurora-blob aurora-blob-2"></div>
+    <div class="aurora-blob aurora-blob-3"></div>
+    <div class="ambient-noise"></div>
+  </div>
   <div class="error-container">
     <div class="error-card">
       <div class="brand-icon" style="width: 48px; height: 48px;">
