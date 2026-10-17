@@ -718,6 +718,11 @@ body.bg-canvas {
   gap: 1.25rem;
 }
 
+.kpi-bento-grid > *,
+.kpi-card {
+  min-width: 0;
+}
+
 .kpi-card {
   display: flex;
   flex-direction: column;
@@ -737,6 +742,9 @@ body.bg-canvas {
   font-weight: 600;
   color: var(--text-secondary);
   text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .kpi-icon-wrap {
@@ -759,6 +767,7 @@ body.bg-canvas {
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
+  min-width: 0;
 }
 
 .kpi-value-wrap {
@@ -766,16 +775,20 @@ body.bg-canvas {
   min-height: 2.2rem;
   display: flex;
   align-items: center;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .kpi-value {
   font-family: var(--font-mono);
   font-feature-settings: 'tnum' 1;
-  font-size: 1.85rem;
+  font-size: clamp(1.15rem, 1.2vw + 0.45rem, 1.75rem);
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
   color: var(--text-primary);
   line-height: 1.1;
+  white-space: nowrap;
+  max-width: 100%;
   transition: opacity 0.2s ease;
 }
 
@@ -1517,6 +1530,9 @@ body.bg-canvas {
   .kpi-bento-grid > div:nth-child(5) {
     grid-column: span 1;
   }
+  .bento-card.kpi-card {
+    padding: 1.15rem 1.1rem;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -1631,7 +1647,7 @@ body.bg-canvas {
   }
 
   .kpi-value {
-    font-size: 1.6rem;
+    font-size: clamp(1.25rem, 4.5vw, 1.55rem);
   }
 
   .table-actions {
