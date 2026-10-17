@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SecureRegent — Business Performance & Revenue Analytics</title>
+  <meta name="description" content="Interactive Bento Grid analytics dashboard tracking leads, quotations, deals, orders and revenue for services businesses.">
+
+  <!-- Favicon (Inline SVG Data URI) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
+  
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js CDN (v4.4.4) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-canvas">
+  <div class="app-layout">
+    
+    <!-- Mobile Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
+    <!-- Fixed Desktop Sidebar / Off-canvas Mobile Drawer -->
+    <aside class="sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1 class="brand-title">SecureRegent</h1>
+            <span class="brand-subtitle">Analytics Engine</span>
+          </div>
+        </div>
+        <button class="mobile-close-btn" id="sidebar-close-btn" aria-label="Close Navigation">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-group-title">Analytics Modules</div>
+        <button class="nav-item active" data-tab="overview">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="9"></rect>
+            <rect x="14" y="3" width="7" height="5"></rect>
+            <rect x="14" y="12" width="7" height="9"></rect>
+            <rect x="3" y="16" width="7" height="5"></rect>
+          </svg>
+          <span>Overview & Funnel</span>
+        </button>
+        <button class="nav-item" data-tab="quotations-deals">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <span>Quotations & Deals</span>
+        </button>
+        <button class="nav-item" data-tab="orders-revenue">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"></line>
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+          </svg>
+          <span>Orders & Revenue</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="system-status-card">
+          <div class="status-indicator">
+            <span class="pulse-dot"></span>
+            <span>Static Engine Online</span>
+          </div>
+          <p class="status-meta">Oct 17, 2026 • 182 Leads Loaded</p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      
+      <!-- Top Action Bar with Filter Controls -->
+      <header class="dashboard-header">
+        <div class="header-left">
+          <button class="hamburger-btn" id="sidebar-toggle-btn" aria-label="Open Navigation">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div>
+            <h2 class="view-title" id="page-heading">Performance Overview</h2>
+            <p class="view-subtitle" id="period-comparison-label">Comparing against prior equivalent period</p>
+          </div>
+        </div>
+
+        <!-- Date Filter Bar with Moving Gradient Border -->
+        <div class="filter-bar-container">
+          <div class="filter-presets" id="filter-presets">
+            <button class="filter-preset-btn" data-preset="today">Today</button>
+            <button class="filter-preset-btn" data-preset="7d">Last 7 Days</button>
+            <button class="filter-preset-btn active" data-preset="30d">Last 30 Days</button>
+            <button class="filter-preset-btn" data-preset="custom">Custom</button>
+          </div>
+
+          <!-- Custom Date Range Picker Dropdown -->
+          <div class="custom-range-panel" id="custom-range-panel" style="display: none;">
+            <div class="range-inputs">
+              <div class="input-field">
+                <label for="custom-from">From</label>
+                <input type="date" id="custom-from" min="2026-06-01" max="2026-10-17" value="2026-09-18">
+              </div>
+              <div class="input-field">
+                <label for="custom-to">To</label>
+                <input type="date" id="custom-to" min="2026-06-01" max="2026-10-17" value="2026-10-17">
+              </div>
+            </div>
+            <button class="apply-range-btn" id="apply-custom-range-btn">Apply Range</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Dashboard Canvas -->
+      <main class="dashboard-content" id="dashboard-content">
+        
+        <!-- ==========================================================================
+             VIEW 1: OVERVIEW & FUNNEL
+             ========================================================================== -->
+        <div class="dashboard-view active" id="view-overview">
+          
+          <!-- Lead KPI Bento Row -->
+          <section class="bento-section">
+            <div class="section-meta-header">
+              <div>
+                <h3 class="section-title">Lead Acquisition & Conversion</h3>
+                <p class="section-description">Core funnel health and lead generation velocity</p>
+              </div>
+            </div>
+
+            <div class="kpi-bento-grid" id="lead-kpi-grid">
+              
+              <!-- Total Leads -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight id="kpi-total-leads">
+                <div class="kpi-header">
+                  <span class="kpi-label">Total Leads</span>
+                  <div class="kpi-icon-wrap icon-indigo">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-total-leads" data-val="0">0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-total-leads"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Qualified Leads -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight id="kpi-qualified-leads">
+                <div class="kpi-header">
+                  <span class="kpi-label">Qualified Leads</span>
+                  <div class="kpi-icon-wrap icon-info">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-qualified-leads" data-val="0">0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-qualified-leads"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Converted Leads -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight id="kpi-converted-leads">
+                <div class="kpi-header">
+                  <span class="kpi-label">Converted Leads</span>
+                  <div class="kpi-icon-wrap icon-success">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-converted-leads" data-val="0">0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-converted-leads"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Unqualified -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight id="kpi-unqualified-leads">
+                <div class="kpi-header">
+                  <span class="kpi-label">Unqualified</span>
+                  <div class="kpi-icon-wrap icon-danger">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="15" y1="9" x2="9" y2="15"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-unqualified-leads" data-val="0">0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-unqualified-leads"><span class="delta-arrow">↓</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Conversion Rate -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight id="kpi-conversion-rate">
+                <div class="kpi-header">
+                  <span class="kpi-label">Conversion Rate</span>
+                  <div class="kpi-icon-wrap icon-purple">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="19" y1="5" x2="5" y2="19"></line>
+                      <circle cx="6.5" cy="6.5" r="2.5"></circle>
+                      <circle cx="17.5" cy="17.5" r="2.5"></circle>
+                    </svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-conversion-rate" data-val="0" data-is-percent="true">0.0%</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-conversion-rate"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Funnel & Trend Charts -->
+          <section class="bento-section">
+            <div class="charts-bento-grid">
+              
+              <!-- Funnel -->
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Lead Progression Funnel</h4>
+                    <p class="card-subtitle">Volume retention from New to Converted</p>
+                  </div>
+                  <span class="badge-accent">Active Filter</span>
+                </div>
+                <div class="funnel-stats-row">
+                  <div class="f-stat-item"><span class="f-stat-label">Total Leads</span><span class="f-stat-val" id="funnel-stat-total">0</span></div>
+                  <div class="f-stat-arrow">→</div>
+                  <div class="f-stat-item"><span class="f-stat-label">Qualified</span><span class="f-stat-val text-info" id="funnel-stat-qual">0</span></div>
+                  <div class="f-stat-arrow">→</div>
+                  <div class="f-stat-item"><span class="f-stat-label">Converted</span><span class="f-stat-val text-success" id="funnel-stat-conv">0</span></div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 190px;">
+                  <canvas id="chart-lead-funnel"></canvas>
+                </div>
+              </div>
+
+              <!-- Status Trend -->
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Lead Status Velocity</h4>
+                    <p class="card-subtitle">Volume distribution trends over selected range</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 250px;">
+                  <canvas id="chart-status-trend"></canvas>
+                </div>
+              </div>
+
+              <!-- Source Share -->
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Acquisition Source Share</h4>
+                    <p class="card-subtitle">Leads distribution by inbound channel</p>
+                  </div>
+                </div>
+                <div class="donut-chart-container">
+                  <div class="chart-canvas-wrap" style="height: 220px; position: relative;">
+                    <canvas id="chart-source-share"></canvas>
+                    <div class="donut-center-label">
+                      <span class="center-count" id="source-share-center-total">0</span>
+                      <span class="center-sub">Leads</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Source Stacked Trend -->
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Channel Inflow Over Time</h4>
+                    <p class="card-subtitle">Daily / interval breakdown by marketing channel</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 220px;">
+                  <canvas id="chart-source-trend"></canvas>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Leads Directory Table -->
+          <section class="bento-section">
+            <div class="bento-card table-bento-card">
+              <div class="table-header-toolbar">
+                <div>
+                  <h4 class="card-title">Leads Directory</h4>
+                  <p class="card-subtitle" id="table-leads-count-label">Showing leads within selected date filter</p>
+                </div>
+                <div class="table-actions">
+                  <div class="search-input-wrap">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="table-search-input" placeholder="Search name or company...">
+                  </div>
+                  <select class="table-select" id="table-status-filter">
+                    <option value="ALL">All Statuses</option>
+                    <option value="New">New</option>
+                    <option value="Qualified">Qualified</option>
+                    <option value="Converted">Converted</option>
+                    <option value="Unqualified">Unqualified</option>
+                  </select>
+                  <select class="table-select" id="table-source-filter">
+                    <option value="ALL">All Sources</option>
+                    <option value="Website">Website</option>
+                    <option value="Referral">Referral</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="Google Ads">Google Ads</option>
+                    <option value="Cold Call">Cold Call</option>
+                    <option value="Instagram">Instagram</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="leads-table">
+                  <thead>
+                    <tr>
+                      <th>Lead Name</th>
+                      <th>Company</th>
+                      <th>Source</th>
+                      <th>Service Interest</th>
+                      <th>Status</th>
+                      <th>Created Date</th>
+                      <th style="text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="leads-table-body"></tbody>
+                </table>
+              </div>
+              <div class="table-pagination-footer">
+                <span id="table-pagination-info">Displaying leads</span>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- ==========================================================================
+             VIEW 2: QUOTATIONS & DEALS
+             ========================================================================== -->
+        <div class="dashboard-view" id="view-quotations-deals">
+          
+          <!-- Quotations KPI Row -->
+          <section class="bento-section">
+            <div class="section-meta-header">
+              <div>
+                <h3 class="section-title">Quotations Pipeline</h3>
+                <p class="section-description">Estimates, quote volume, and deal conversion efficiency</p>
+              </div>
+            </div>
+
+            <div class="kpi-bento-grid kpi-4-grid" id="quotes-kpi-grid">
+              
+              <!-- Total Quotes -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Total Quotations</span>
+                  <div class="kpi-icon-wrap icon-indigo">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-total-quotes" data-val="0">0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-total-quotes"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quoted Value -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Quoted Pipeline Value</span>
+                  <div class="kpi-icon-wrap icon-purple">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-total-quoted-value" data-val="0" data-is-currency="true">₹0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-quoted-value"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accepted Quotes -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Accepted Quotes</span>
+                  <div class="kpi-icon-wrap icon-success">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-accepted-quotes" data-val="0">0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-accepted-quotes"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quote-to-Deal Conversion Rate -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Quote-to-Deal Rate</span>
+                  <div class="kpi-icon-wrap icon-info">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"></line><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-quote-conv-rate" data-val="0" data-is-percent="true">0.0%</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-quote-conv-rate"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Quotations Charts -->
+          <section class="bento-section">
+            <div class="charts-bento-grid">
+              
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Quotations by Service</h4>
+                    <p class="card-subtitle">Count & aggregate quoted value across service lines</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 240px;">
+                  <canvas id="chart-quote-service"></canvas>
+                </div>
+              </div>
+
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Quoted Value by Category</h4>
+                    <p class="card-subtitle">Split across Consulting, SaaS, Delivery & Support</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 240px;">
+                  <canvas id="chart-quote-category"></canvas>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Quotations Table -->
+          <section class="bento-section">
+            <div class="bento-card table-bento-card">
+              <div class="table-header-toolbar">
+                <div>
+                  <h4 class="card-title">Quotations Ledger</h4>
+                  <p class="card-subtitle">All issued quotes in range (click any row to view full lead history)</p>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="leads-table">
+                  <thead>
+                    <tr>
+                      <th>Quote ID</th>
+                      <th>Lead / Company</th>
+                      <th>Service</th>
+                      <th>Category</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th style="text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="quotations-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          <!-- Deals & Revenue KPI Row -->
+          <section class="bento-section" style="margin-top: 1rem;">
+            <div class="section-meta-header">
+              <div>
+                <h3 class="section-title">Deals & Realized Revenue</h3>
+                <p class="section-description">Won deal value, collections, and outstanding receivables</p>
+              </div>
+            </div>
+
+            <div class="kpi-bento-grid kpi-4-grid" id="deals-kpi-grid">
+              
+              <!-- Total Deals -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Total Deals</span>
+                  <div class="kpi-icon-wrap icon-indigo">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-total-deals" data-val="0">0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-total-deals"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Total Won Revenue -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Won Deal Revenue</span>
+                  <div class="kpi-icon-wrap icon-success">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-won-revenue" data-val="0" data-is-currency="true">₹0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-won-revenue"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Collected Amount -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Collected Payments</span>
+                  <div class="kpi-icon-wrap icon-info">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-collected-revenue" data-val="0" data-is-currency="true">₹0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-collected-revenue"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Outstanding Amount -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Outstanding Balance</span>
+                  <div class="kpi-icon-wrap icon-danger">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-outstanding-revenue" data-val="0" data-is-currency="true">₹0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-outstanding-revenue"><span class="delta-arrow">↓</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Deals Charts -->
+          <section class="bento-section">
+            <div class="charts-bento-grid">
+              
+              <!-- Deals by Service -->
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Deals by Service</h4>
+                    <p class="card-subtitle">Won vs In-Progress deal counts</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 240px;">
+                  <canvas id="chart-deals-service"></canvas>
+                </div>
+              </div>
+
+              <!-- Deals by Priority -->
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Deals by Priority</h4>
+                    <p class="card-subtitle">Distribution across High, Medium, and Low</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 240px;">
+                  <canvas id="chart-deals-priority"></canvas>
+                </div>
+              </div>
+
+              <!-- Daily Revenue Trend -->
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Daily Revenue Collection Trend</h4>
+                    <p class="card-subtitle">Realized payment inflow over time</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 240px;">
+                  <canvas id="chart-daily-revenue-trend"></canvas>
+                </div>
+              </div>
+
+              <!-- Total vs Collected vs Outstanding -->
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Revenue Realization Audit</h4>
+                    <p class="card-subtitle">Won contract value vs Collected vs Outstanding</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 240px;">
+                  <canvas id="chart-revenue-comparison"></canvas>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Deal Progress Table -->
+          <section class="bento-section">
+            <div class="bento-card table-bento-card">
+              <div class="table-header-toolbar">
+                <div>
+                  <h4 class="card-title">Deal Pipeline & Progress</h4>
+                  <p class="card-subtitle">Active and closed deals with milestone progress tracking</p>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="leads-table">
+                  <thead>
+                    <tr>
+                      <th>Deal ID</th>
+                      <th>Lead Company</th>
+                      <th>Service</th>
+                      <th>Value</th>
+                      <th>Priority</th>
+                      <th>Status</th>
+                      <th>Progress</th>
+                      <th style="text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="deals-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+        <!-- ==========================================================================
+             VIEW 3: ORDERS & REVENUE
+             ========================================================================== -->
+        <div class="dashboard-view" id="view-orders-revenue">
+          
+          <!-- Orders & Payments KPI Row -->
+          <section class="bento-section">
+            <div class="section-meta-header">
+              <div>
+                <h3 class="section-title">Orders Fulfillment & Payment Collections</h3>
+                <p class="section-description">Delivery throughput and cash collection logs</p>
+              </div>
+            </div>
+
+            <div class="kpi-bento-grid kpi-4-grid" id="orders-kpi-grid">
+              
+              <!-- Total Orders -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Total Orders</span>
+                  <div class="kpi-icon-wrap icon-indigo">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-total-orders" data-val="0">0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-total-orders"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Completed Orders -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Completed Orders</span>
+                  <div class="kpi-icon-wrap icon-success">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-completed-orders" data-val="0">0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-completed-orders"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Completion Rate -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Completion Rate</span>
+                  <div class="kpi-icon-wrap icon-info">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="5" x2="5" y2="19"></line><circle cx="6.5" cy="6.5" r="2.5"></circle><circle cx="17.5" cy="17.5" r="2.5"></circle></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-order-completion-rate" data-val="0" data-is-percent="true">0.0%</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-order-completion-rate"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Payments Collected -->
+              <div class="bento-card spotlight-card kpi-card" data-spotlight>
+                <div class="kpi-header">
+                  <span class="kpi-label">Period Collections</span>
+                  <div class="kpi-icon-wrap icon-purple">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                  </div>
+                </div>
+                <div class="kpi-body">
+                  <div class="kpi-value-wrap">
+                    <span class="kpi-value count-up-val" id="val-order-payments-collected" data-val="0" data-is-currency="true">₹0</span>
+                  </div>
+                  <div class="kpi-footer">
+                    <span class="delta-chip" id="chip-order-payments-collected"><span class="delta-arrow">↑</span><span class="delta-text">0.0%</span></span>
+                    <span class="delta-label">vs prior</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Orders & Payments Charts -->
+          <section class="bento-section">
+            <div class="charts-bento-grid">
+              
+              <!-- Order Status Breakdown -->
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Order Fulfillment Status</h4>
+                    <p class="card-subtitle">Pending, In Progress, and Completed milestones</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 240px;">
+                  <canvas id="chart-order-status"></canvas>
+                </div>
+              </div>
+
+              <!-- Payment Collection Trend -->
+              <div class="bento-card spotlight-card" data-spotlight>
+                <div class="card-title-row">
+                  <div>
+                    <h4 class="card-title">Payment Collection Timeline</h4>
+                    <p class="card-subtitle">Realized bank and UPI collections across dates</p>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap" style="height: 240px;">
+                  <canvas id="chart-payment-trend"></canvas>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- Payment History Table -->
+          <section class="bento-section">
+            <div class="bento-card table-bento-card">
+              <div class="table-header-toolbar">
+                <div>
+                  <h4 class="card-title">Payment Transaction History</h4>
+                  <p class="card-subtitle">All payment receipts in selected period (click row to inspect lead)</p>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="leads-table">
+                  <thead>
+                    <tr>
+                      <th>Payment ID</th>
+                      <th>Deal ID</th>
+                      <th>Linked Order</th>
+                      <th>Amount</th>
+                      <th>Payment Method</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th style="text-align: right;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="payments-table-body"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+        </div>
+
+      </main>
+    </div>
+
+    <!-- ==========================================================================
+         Slide-over Relational Drill-Down Drawer (Lead Details)
+         ========================================================================== -->
+    <div class="drilldown-backdrop" id="drilldown-backdrop"></div>
+    <aside class="drilldown-drawer" id="drilldown-drawer">
+      
+      <div class="dd-header">
+        <div class="dd-header-info">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <h3 class="dd-title" id="dd-lead-name">Lead Details</h3>
+            <span class="status-badge" id="dd-lead-status">Status</span>
+          </div>
+          <p class="dd-subtitle"><span id="dd-lead-company">Company</span> • <span id="dd-lead-email">email@example.com</span></p>
+        </div>
+        <button class="dd-close-btn" id="drilldown-close-btn" aria-label="Close details">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Quick Summary Badges -->
+      <div class="dd-meta-ribbon">
+        <div class="dd-meta-item">
+          <span class="meta-label">Source</span>
+          <span class="meta-val" id="dd-lead-source">Website</span>
+        </div>
+        <div class="dd-meta-item">
+          <span class="meta-label">Acquired</span>
+          <span class="meta-val" id="dd-lead-date">Date</span>
+        </div>
+        <div class="dd-meta-item">
+          <span class="meta-label">Lead Score</span>
+          <span class="meta-val text-accent" id="dd-lead-score">85/100</span>
+        </div>
+      </div>
+
+      <!-- Financial Rollup Strip -->
+      <div class="dd-rollup-strip">
+        <div class="rollup-box">
+          <span class="rollup-label">Total Quoted</span>
+          <span class="rollup-val" id="dd-metric-quoted">₹0</span>
+        </div>
+        <div class="rollup-box">
+          <span class="rollup-label">Deals Won</span>
+          <span class="rollup-val text-success" id="dd-metric-won">₹0</span>
+        </div>
+        <div class="rollup-box">
+          <span class="rollup-label">Collected</span>
+          <span class="rollup-val text-accent" id="dd-metric-paid">₹0</span>
+        </div>
+      </div>
+
+      <!-- Relational Accordion / Sections -->
+      <div class="dd-sections-container">
+        
+        <!-- Section: Quotations -->
+        <div class="dd-section-block">
+          <div class="dd-section-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            <span>Quotations Issued</span>
+          </div>
+          <div class="dd-items-list" id="dd-quotations-list"></div>
+        </div>
+
+        <!-- Section: Deals -->
+        <div class="dd-section-block">
+          <div class="dd-section-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+            <span>Linked Deals</span>
+          </div>
+          <div class="dd-items-list" id="dd-deals-list"></div>
+        </div>
+
+        <!-- Section: Orders -->
+        <div class="dd-section-block">
+          <div class="dd-section-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+            </svg>
+            <span>Delivery Orders</span>
+          </div>
+          <div class="dd-items-list" id="dd-orders-list"></div>
+        </div>
+
+        <!-- Section: Payments -->
+        <div class="dd-section-block">
+          <div class="dd-section-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+              <line x1="1" y1="10" x2="23" y2="10"></line>
+            </svg>
+            <span>Payments & Collections</span>
+          </div>
+          <div class="dd-items-list" id="dd-payments-list"></div>
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Scripts in execution sequence -->
+  <script src="js/data.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/drilldown.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
