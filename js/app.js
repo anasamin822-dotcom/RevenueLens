@@ -114,11 +114,16 @@
     const text = chip.querySelector('.delta-text');
     if (arrow) arrow.textContent = deltaObj.dir === 'positive' ? '↑' : deltaObj.dir === 'negative' ? '↓' : '—';
     if (text) text.textContent = customText || deltaObj.str;
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      chip.classList.remove('chip-pop');
+      void chip.offsetWidth; // trigger reflow
+      chip.classList.add('chip-pop');
+    }
   }
 
-  // --- Count-Up Animation (Cubic Ease-Out) ---
-  // --- Count-Up Animation (Cubic Ease-Out) ---
-  function animateCountUp(element, targetVal, isPercent = false, isCurrency = false, duration = 400) {
+  // --- Count-Up Animation (Originkit Ease-Out Exponential) ---
+  function animateCountUp(element, targetVal, isPercent = false, isCurrency = false, duration = 480) {
     if (!element) return;
 
     function formatVal(v) {
@@ -127,9 +132,7 @@
       return Math.round(v).toLocaleString('en-IN');
     }
 
-    // If element is not currently visible (e.g. inactive tab with display: none),
-    // update value immediately without relying on throttled rAF
-    if (element.offsetParent === null) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || element.offsetParent === null) {
       element.textContent = formatVal(targetVal);
       element.setAttribute('data-val', targetVal.toString());
       return;
@@ -147,7 +150,7 @@
     function frame(now) {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
+      const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
       const current = startVal + (targetVal - startVal) * ease;
 
       element.textContent = formatVal(current);
@@ -163,22 +166,127 @@
     requestAnimationFrame(frame);
   }
 
-  // --- Aceternity UI: Card Spotlight Hover Listener ---
+  // --- Originkit Text Scramble / Decrypt Effect ---
+  const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#@$%&';
+  function scrambleText(element, finalText, duration = 380) {
+    if (!element || !finalText) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      element.textContent = finalText;
+      return;
+    }
+
+    const start = performance.now();
+    const len = finalText.length;
+
+    function update(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const solvedCount = Math.floor(progress * len);
+
+      let result = '';
+      for (let i = 0; i < len; i++) {
+        if (finalText[i] === ' ' || finalText[i] === '•' || finalText[i] === '&' || finalText[i] === '—' || finalText[i] === ',') {
+          result += finalText[i];
+        } else if (i < solvedCount) {
+          result += finalText[i];
+        } else {
+          result += SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+        }
+      }
+
+      element.textContent = result;
+
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        element.textContent = finalText;
+      }
+    }
+
+    requestAnimationFrame(update);
+  }
+
+  // --- Aceternity / Originkit UI: Card Spotlight + 3D Pointer Tilt ---
   function initSpotlightCards() {
+    const isFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const cards = document.querySelectorAll('[data-spotlight]');
+
     cards.forEach(card => {
+      if (card._hasSpotlightListener) return;
+      card._hasSpotlightListener = true;
+
       card.addEventListener('mousemove', e => {
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         card.style.setProperty('--mouse-x', `${x}px`);
         card.style.setProperty('--mouse-y', `${y}px`);
+
+        if (isFinePointer && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const rotateX = ((y - centerY) / centerY) * -3.2;
+          const rotateY = ((x - centerX) / centerX) * 3.2;
+          card.style.transform = `perspective(900px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) translateY(-2px)`;
+        }
       });
 
       card.addEventListener('mouseleave', () => {
         card.style.setProperty('--mouse-x', `-999px`);
         card.style.setProperty('--mouse-y', `-999px`);
+        if (isFinePointer) {
+          card.style.transform = '';
+        }
       });
+    });
+  }
+
+  // --- Magnetic Pull for Primary Action Elements ---
+  function initMagneticButtons() {
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const targets = document.querySelectorAll('.filter-preset-btn, .apply-range-btn, .btn-row-action');
+    targets.forEach(btn => {
+      if (btn._hasMagneticListener) return;
+      btn._hasMagneticListener = true;
+
+      btn.addEventListener('mousemove', e => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const pullX = (x / (rect.width / 2)) * 3;
+        const pullY = (y / (rect.height / 2)) * 3;
+        btn.style.transform = `translate(${pullX.toFixed(1)}px, ${pullY.toFixed(1)}px)`;
+      });
+
+      btn.addEventListener('mouseleave', () => {
+        btn.style.transform = '';
+      });
+    });
+  }
+
+  // --- Click Ripple Wave Effect ---
+  function initRippleEffects() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    document.addEventListener('click', e => {
+      const target = e.target.closest('.filter-preset-btn, .apply-range-btn, .btn-row-action, .nav-item, .delta-chip');
+      if (!target) return;
+
+      const rect = target.getBoundingClientRect();
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple-wave';
+      const size = Math.max(rect.width, rect.height) * 2;
+      ripple.style.width = `${size}px`;
+      ripple.style.height = `${size}px`;
+      ripple.style.left = `${e.clientX - rect.left - size / 2}px`;
+      ripple.style.top = `${e.clientY - rect.top - size / 2}px`;
+      target.appendChild(ripple);
+
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
     });
   }
 
@@ -225,6 +333,16 @@
       'orders-revenue': { el: document.getElementById('view-orders-revenue'), title: 'Orders Fulfillment & Payment Collections' }
     };
 
+    // Stagger indices and original text labels for default overview
+    if (views['overview'] && views['overview'].el) {
+      views['overview'].el.querySelectorAll('.bento-card').forEach((c, idx) => {
+        c.style.setProperty('--card-index', idx);
+      });
+      views['overview'].el.querySelectorAll('.section-title').forEach(st => {
+        st.setAttribute('data-original-text', st.textContent);
+      });
+    }
+
     navButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         const tab = btn.getAttribute('data-tab');
@@ -239,13 +357,34 @@
 
         if (views[tab].el) {
           views[tab].el.classList.add('active');
-          if (heading) heading.textContent = views[tab].title;
+          if (heading) {
+            scrambleText(heading, views[tab].title);
+          }
+
+          // Scramble section titles in newly active view
+          views[tab].el.querySelectorAll('.section-title').forEach(st => {
+            const orig = st.getAttribute('data-original-text') || st.textContent;
+            st.setAttribute('data-original-text', orig);
+            scrambleText(st, orig);
+          });
+
+          // Stagger card entrance animations
+          const cards = views[tab].el.querySelectorAll('.bento-card');
+          cards.forEach((c, idx) => {
+            c.style.setProperty('--card-index', idx);
+          });
+
+          // Reset counters so they count up cleanly
+          views[tab].el.querySelectorAll('.count-up-val').forEach(el => {
+            el.setAttribute('data-val', '0');
+          });
         }
 
         DashboardState.currentView = tab;
         closeNav();
         // Re-attach spotlight on newly displayed cards
         initSpotlightCards();
+        initMagneticButtons();
 
         // Immediately resize charts and re-render data for the newly active view
         requestAnimationFrame(() => {
@@ -758,6 +897,8 @@
     initFilterBar();
     initNavigation();
     initSpotlightCards();
+    initMagneticButtons();
+    initRippleEffects();
     initAuroraGovernor();
     initTableFilterListeners();
 

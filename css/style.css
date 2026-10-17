@@ -653,11 +653,12 @@ body.bg-canvas {
   box-shadow: var(--shadow-glass), var(--inner-highlight);
   position: relative;
   overflow: hidden;
-  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow var(--transition-smooth), border-color var(--transition-smooth);
 }
 
 .bento-card:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-glass-hover), var(--inner-highlight);
   border-color: var(--border-glass-hover);
 }
@@ -668,7 +669,7 @@ body.bg-canvas {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(350px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(99, 102, 241, 0.12), transparent 75%);
+  background: radial-gradient(380px circle at var(--mouse-x, -999px) var(--mouse-y, -999px), rgba(99, 102, 241, 0.14), transparent 75%);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.35s ease;
@@ -677,6 +678,125 @@ body.bg-canvas {
 
 .spotlight-card:hover::after {
   opacity: 1;
+}
+
+/* Originkit Border Beam Accent */
+@property --beam-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+.beam-card {
+  position: relative;
+}
+
+.beam-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--beam-angle, 0deg) at 50% 50%,
+    transparent 0%,
+    transparent 70%,
+    rgba(99, 102, 241, 0.35) 85%,
+    rgba(168, 85, 247, 0.7) 94%,
+    rgba(56, 189, 248, 0.9) 98%,
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: beam-spin 9s linear infinite;
+  z-index: 1;
+}
+
+@keyframes beam-spin {
+  to {
+    --beam-angle: 360deg;
+  }
+}
+
+/* Staggered Entrance for Cards */
+.dashboard-view.active .bento-card {
+  animation: card-fade-rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--card-index, 0) * 35ms);
+}
+
+@keyframes card-fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button & Action Shimmer Sweep */
+.btn-shimmer,
+.filter-preset-btn,
+.btn-row-action,
+.apply-range-btn {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.filter-preset-btn::after,
+.btn-row-action::after,
+.apply-range-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -75%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.65) 50%,
+    transparent 100%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 3;
+}
+
+.filter-preset-btn:hover::after,
+.btn-row-action:hover::after,
+.apply-range-btn:hover::after {
+  opacity: 1;
+  animation: shimmer-sweep 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes shimmer-sweep {
+  0% { transform: translateX(-100%) rotate(25deg); }
+  100% { transform: translateX(400%) rotate(25deg); }
+}
+
+/* Ripple Wave on Click */
+.ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.32) 0%, rgba(139, 92, 246, 0.18) 60%, transparent 100%);
+  transform: scale(0);
+  animation: ripple-spread 0.55s ease-out forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes ripple-spread {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
 }
 
 /* ==========================================================================
@@ -811,6 +931,8 @@ body.bg-canvas {
   font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.2;
+  position: relative;
+  overflow: hidden;
 }
 
 .delta-chip.positive {
@@ -829,6 +951,16 @@ body.bg-canvas {
   background-color: var(--status-neutral-bg);
   color: var(--status-neutral);
   border: 1px solid var(--border-subtle);
+}
+
+.delta-chip.chip-pop {
+  animation: chip-pop-anim 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes chip-pop-anim {
+  0% { transform: scale(0.85); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 .delta-arrow {
@@ -1684,5 +1816,31 @@ body.bg-canvas {
   .filter-preset-btn {
     padding: 0.35rem 0.45rem;
     font-size: 0.7rem;
+  }
+}
+
+/* ==========================================================================
+   Accessibility: Prefers Reduced Motion Guard
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .dashboard-view.active .bento-card,
+  .filter-preset-btn:hover::after,
+  .btn-row-action:hover::after,
+  .apply-range-btn:hover::after,
+  .ripple-wave,
+  .beam-card::before,
+  .delta-chip.chip-pop {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
   }
 }

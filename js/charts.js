@@ -14,6 +14,12 @@
     Chart.defaults.font.family = "'Outfit', -apple-system, BlinkMacSystemFont, sans-serif";
     Chart.defaults.font.size = 12;
     Chart.defaults.color = '#475569';
+    Chart.defaults.animation = (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+      ? false
+      : {
+          duration: 450,
+          easing: 'easeOutQuart'
+        };
     Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15, 23, 42, 0.94)';
     Chart.defaults.plugins.tooltip.titleColor = '#ffffff';
     Chart.defaults.plugins.tooltip.bodyColor = '#f8fafc';
