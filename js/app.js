@@ -54,6 +54,17 @@
   global.DashboardState = DashboardState;
 
   // --- Date Math Helpers ---
+  function parseLocalDate(dateStr, h = 0, m = 0, s = 0, ms = 0) {
+    if (!dateStr) return new Date();
+    if (dateStr instanceof Date) {
+      const d = new Date(dateStr.getTime());
+      d.setHours(h, m, s, ms);
+      return d;
+    }
+    const parts = dateStr.split('-').map(Number);
+    return new Date(parts[0], parts[1] - 1, parts[2], h, m, s, ms);
+  }
+
   function computePeriodDates(preset, customFromStr, customToStr) {
     const to = new Date(TODAY.getTime());
     to.setHours(23, 59, 59, 999);
@@ -68,10 +79,8 @@
       from.setDate(from.getDate() - 29);
       from.setHours(0, 0, 0, 0);
     } else if (preset === 'custom' && customFromStr && customToStr) {
-      from = new Date(customFromStr);
-      from.setHours(0, 0, 0, 0);
-      const customTo = new Date(customToStr);
-      customTo.setHours(23, 59, 59, 999);
+      from = parseLocalDate(customFromStr, 0, 0, 0, 0);
+      const customTo = parseLocalDate(customToStr, 23, 59, 59, 999);
       const prior = getPreviousEquivalentPeriod(from, customTo);
       return { from, to: customTo, priorFrom: prior.from, priorTo: prior.to };
     }
@@ -108,9 +117,31 @@
   }
 
   // --- Count-Up Animation (Cubic Ease-Out) ---
-  function animateCountUp(element, targetVal, isPercent = false, isCurrency = false, duration = 600) {
+  // --- Count-Up Animation (Cubic Ease-Out) ---
+  function animateCountUp(element, targetVal, isPercent = false, isCurrency = false, duration = 400) {
     if (!element) return;
+
+    function formatVal(v) {
+      if (isCurrency) return formatCurrencyINR(Math.round(v));
+      if (isPercent) return `${v.toFixed(1)}%`;
+      return Math.round(v).toLocaleString('en-IN');
+    }
+
+    // If element is not currently visible (e.g. inactive tab with display: none),
+    // update value immediately without relying on throttled rAF
+    if (element.offsetParent === null) {
+      element.textContent = formatVal(targetVal);
+      element.setAttribute('data-val', targetVal.toString());
+      return;
+    }
+
     const startVal = parseFloat(element.getAttribute('data-val') || '0');
+    if (isNaN(startVal) || startVal === targetVal) {
+      element.textContent = formatVal(targetVal);
+      element.setAttribute('data-val', targetVal.toString());
+      return;
+    }
+
     const startTime = performance.now();
 
     function frame(now) {
@@ -119,17 +150,12 @@
       const ease = 1 - Math.pow(1 - progress, 3);
       const current = startVal + (targetVal - startVal) * ease;
 
-      if (isCurrency) {
-        element.textContent = formatCurrencyINR(Math.round(current));
-      } else if (isPercent) {
-        element.textContent = `${current.toFixed(1)}%`;
-      } else {
-        element.textContent = Math.round(current).toLocaleString('en-IN');
-      }
+      element.textContent = formatVal(current);
 
       if (progress < 1) {
         requestAnimationFrame(frame);
       } else {
+        element.textContent = formatVal(targetVal);
         element.setAttribute('data-val', targetVal.toString());
       }
     }
@@ -220,6 +246,14 @@
         closeNav();
         // Re-attach spotlight on newly displayed cards
         initSpotlightCards();
+
+        // Immediately resize charts and re-render data for the newly active view
+        requestAnimationFrame(() => {
+          if (global.SecureRegentCharts && global.SecureRegentCharts.resizeAll) {
+            global.SecureRegentCharts.resizeAll();
+          }
+          DashboardState.notify();
+        });
       });
     });
   }
@@ -319,14 +353,12 @@
 
       const wonDealsInRange = currDeals.filter(d => d.status === 'Won');
       const currWonRev = wonDealsInRange.reduce((acc, d) => acc + d.value, 0);
-      const wonDealIds = new Set(wonDealsInRange.map(d => d.id));
-      const currCollected = PAYMENTS.filter(p => wonDealIds.has(p.dealId) && p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0);
+      const currCollected = currPayments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0);
       const currOutstanding = Math.max(0, currWonRev - currCollected);
 
       const priorWonDeals = priorDeals.filter(d => d.status === 'Won');
       const priorWonRev = priorWonDeals.reduce((acc, d) => acc + d.value, 0);
-      const priorWonDealIds = new Set(priorWonDeals.map(d => d.id));
-      const priorCollected = PAYMENTS.filter(p => priorWonDealIds.has(p.dealId) && p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0);
+      const priorCollected = priorPayments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0);
       const priorOutstanding = Math.max(0, priorWonRev - priorCollected);
 
       animateCountUp(document.getElementById('val-total-deals'), currDCount, false);

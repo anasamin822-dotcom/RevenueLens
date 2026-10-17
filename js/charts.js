@@ -77,11 +77,12 @@
     const buckets = [];
 
     if (diffDays <= 1) {
-      // Hourly buckets for Today
-      for (let h = 8; h <= 20; h += 2) {
-        const start = new Date(f.getFullYear(), f.getMonth(), f.getDate(), h, 0, 0);
-        const end = new Date(f.getFullYear(), f.getMonth(), f.getDate(), h + 1, 59, 59);
-        buckets.push({ label: `${h}:00`, start, end });
+      // 3-hour interval buckets covering the full 24 hours for Today
+      for (let h = 0; h < 24; h += 3) {
+        const start = new Date(f.getFullYear(), f.getMonth(), f.getDate(), h, 0, 0, 0);
+        const end = new Date(f.getFullYear(), f.getMonth(), f.getDate(), h + 2, 59, 59, 999);
+        const label = `${String(h).padStart(2, '0')}:00`;
+        buckets.push({ label, start, end });
       }
     } else if (diffDays <= 14) {
       // Daily buckets
@@ -595,9 +596,7 @@
     if (chartInstances.revComparison) {
       const wonDeals = deals.filter(d => d.status === 'Won');
       const totalWon = wonDeals.reduce((sum, d) => sum + d.value, 0);
-      const wonDealIds = new Set(wonDeals.map(d => d.id));
-      const allPayments = window.SecureRegentData ? window.SecureRegentData.PAYMENTS : payments;
-      const collected = allPayments.filter(p => wonDealIds.has(p.dealId) && p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
+      const collected = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
       const outstanding = Math.max(0, totalWon - collected);
 
       chartInstances.revComparison.data.datasets[0].data = [totalWon, collected, outstanding];
@@ -716,9 +715,19 @@
     updateOrdersPaymentsCharts(orders, payments, from, to);
   }
 
+  function resizeAll() {
+    Object.values(chartInstances).forEach(chart => {
+      if (chart && typeof chart.resize === 'function') {
+        chart.resize();
+        chart.update('none');
+      }
+    });
+  }
+
   global.SecureRegentCharts = {
     initAllCharts,
     updateAllCharts,
+    resizeAll,
     chartInstances
   };
 
