@@ -303,13 +303,16 @@
       const currDCount = currDeals.length;
       const priorDCount = priorDeals.length;
 
-      const currWonRev = currDeals.filter(d => d.status === 'Won').reduce((acc, d) => acc + d.value, 0);
-      const priorWonRev = priorDeals.filter(d => d.status === 'Won').reduce((acc, d) => acc + d.value, 0);
-
-      const currCollected = currPayments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0);
-      const priorCollected = priorPayments.filter(p => p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0);
-
+      const wonDealsInRange = currDeals.filter(d => d.status === 'Won');
+      const currWonRev = wonDealsInRange.reduce((acc, d) => acc + d.value, 0);
+      const wonDealIds = new Set(wonDealsInRange.map(d => d.id));
+      const currCollected = PAYMENTS.filter(p => wonDealIds.has(p.dealId) && p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0);
       const currOutstanding = Math.max(0, currWonRev - currCollected);
+
+      const priorWonDeals = priorDeals.filter(d => d.status === 'Won');
+      const priorWonRev = priorWonDeals.reduce((acc, d) => acc + d.value, 0);
+      const priorWonDealIds = new Set(priorWonDeals.map(d => d.id));
+      const priorCollected = PAYMENTS.filter(p => priorWonDealIds.has(p.dealId) && p.status === 'Paid').reduce((acc, p) => acc + p.amount, 0);
       const priorOutstanding = Math.max(0, priorWonRev - priorCollected);
 
       animateCountUp(document.getElementById('val-total-deals'), currDCount, false);

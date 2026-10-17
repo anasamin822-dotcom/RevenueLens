@@ -15,6 +15,16 @@
       if (drawer) drawer.classList.remove('open');
       if (backdrop) backdrop.classList.remove('open');
       document.body.style.overflow = '';
+      const nameEl = document.getElementById('dd-lead-name');
+      const companyEl = document.getElementById('dd-lead-company');
+      const emailEl = document.getElementById('dd-lead-email');
+      const statusPill = document.getElementById('dd-lead-status');
+      const sepEl = document.getElementById('dd-lead-sep');
+      if (nameEl) nameEl.textContent = '';
+      if (companyEl) companyEl.textContent = '';
+      if (emailEl) emailEl.textContent = '';
+      if (statusPill) statusPill.style.display = 'none';
+      if (sepEl) sepEl.style.display = 'none';
     }
 
     if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
@@ -65,9 +75,13 @@
     if (dateEl) dateEl.textContent = formatDate(lead.createdAt);
     if (scoreEl) scoreEl.textContent = `${lead.score}/100`;
 
+    const sepEl = document.getElementById('dd-lead-sep');
+    if (sepEl) sepEl.style.display = 'inline';
+
     if (statusPill) {
       statusPill.textContent = lead.status;
       statusPill.className = `status-badge badge-${lead.status.toLowerCase()}`;
+      statusPill.style.display = 'inline-flex';
     }
 
     // Populate Metrics Row

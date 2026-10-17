@@ -307,6 +307,9 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: {
+            padding: { right: 28, left: 6, top: 10, bottom: 0 }
+          },
           plugins: {
             legend: { position: 'top', align: 'end' },
             tooltip: {
@@ -352,7 +355,14 @@
           maintainAspectRatio: false,
           cutout: '65%',
           plugins: {
-            legend: { position: 'right', labels: { boxWidth: 8, font: { size: 10 } } },
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 8,
+                padding: 8,
+                font: { size: 11 }
+              }
+            },
             tooltip: {
               callbacks: {
                 label: (ctx) => ` ${ctx.label}: ₹${Number(ctx.raw).toLocaleString('en-IN')}`
@@ -579,7 +589,9 @@
     if (chartInstances.revComparison) {
       const wonDeals = deals.filter(d => d.status === 'Won');
       const totalWon = wonDeals.reduce((sum, d) => sum + d.value, 0);
-      const collected = payments.filter(p => p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
+      const wonDealIds = new Set(wonDeals.map(d => d.id));
+      const allPayments = window.SecureRegentData ? window.SecureRegentData.PAYMENTS : payments;
+      const collected = allPayments.filter(p => wonDealIds.has(p.dealId) && p.status === 'Paid').reduce((sum, p) => sum + p.amount, 0);
       const outstanding = Math.max(0, totalWon - collected);
 
       chartInstances.revComparison.data.datasets[0].data = [totalWon, collected, outstanding];

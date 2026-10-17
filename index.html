@@ -511,10 +511,10 @@
                 <div class="card-title-row">
                   <div>
                     <h4 class="card-title">Quoted Value by Category</h4>
-                    <p class="card-subtitle">Split across Consulting, SaaS, Delivery & Support</p>
+                    <p class="card-subtitle">Distribution across specialized service offerings & categories</p>
                   </div>
                 </div>
-                <div class="chart-canvas-wrap" style="height: 240px;">
+                <div class="chart-canvas-wrap" style="height: 270px;">
                   <canvas id="chart-quote-category"></canvas>
                 </div>
               </div>
@@ -742,8 +742,8 @@
           <section class="bento-section">
             <div class="section-meta-header">
               <div>
-                <h3 class="section-title">Orders Fulfillment & Payment Collections</h3>
-                <p class="section-description">Delivery throughput and cash collection logs</p>
+                <h3 class="section-title">Delivery Throughput & Cash Inflow</h3>
+                <p class="section-description">Order execution velocity, milestones, and cash realization logs</p>
               </div>
             </div>
 
@@ -905,10 +905,10 @@
       <div class="dd-header">
         <div class="dd-header-info">
           <div style="display:flex; align-items:center; gap:8px;">
-            <h3 class="dd-title" id="dd-lead-name">Lead Details</h3>
-            <span class="status-badge" id="dd-lead-status">Status</span>
+            <h3 class="dd-title" id="dd-lead-name"></h3>
+            <span class="status-badge" id="dd-lead-status" style="display: none;"></span>
           </div>
-          <p class="dd-subtitle"><span id="dd-lead-company">Company</span> • <span id="dd-lead-email">email@example.com</span></p>
+          <p class="dd-subtitle"><span id="dd-lead-company"></span><span id="dd-lead-sep" style="display: none;"> • </span><span id="dd-lead-email"></span></p>
         </div>
         <button class="dd-close-btn" id="drilldown-close-btn" aria-label="Close details">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -922,15 +922,15 @@
       <div class="dd-meta-ribbon">
         <div class="dd-meta-item">
           <span class="meta-label">Source</span>
-          <span class="meta-val" id="dd-lead-source">Website</span>
+          <span class="meta-val" id="dd-lead-source">—</span>
         </div>
         <div class="dd-meta-item">
           <span class="meta-label">Acquired</span>
-          <span class="meta-val" id="dd-lead-date">Date</span>
+          <span class="meta-val" id="dd-lead-date">—</span>
         </div>
         <div class="dd-meta-item">
           <span class="meta-label">Lead Score</span>
-          <span class="meta-val text-accent" id="dd-lead-score">85/100</span>
+          <span class="meta-val text-accent" id="dd-lead-score">—</span>
         </div>
       </div>
 
