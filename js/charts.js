@@ -721,6 +721,48 @@
     updateOrdersPaymentsCharts(orders, payments, from, to);
   }
 
+  function updateTheme(theme) {
+    const isDark = theme === 'dark';
+    const textColor = isDark ? '#94a3b8' : '#475569';
+    const ticksColor = isDark ? '#94a3b8' : '#64748b';
+    const legendColor = isDark ? '#cbd5e1' : '#334155';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.75)';
+
+    if (typeof Chart !== 'undefined') {
+      Chart.defaults.color = textColor;
+      if (Chart.defaults.plugins && Chart.defaults.plugins.tooltip) {
+        Chart.defaults.plugins.tooltip.backgroundColor = isDark ? 'rgba(15, 23, 42, 0.96)' : 'rgba(15, 23, 42, 0.94)';
+        Chart.defaults.plugins.tooltip.titleColor = isDark ? '#f8fafc' : '#ffffff';
+        Chart.defaults.plugins.tooltip.bodyColor = isDark ? '#cbd5e1' : '#f8fafc';
+        Chart.defaults.plugins.tooltip.borderColor = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.15)';
+      }
+      if (Chart.defaults.plugins && Chart.defaults.plugins.legend && Chart.defaults.plugins.legend.labels) {
+        Chart.defaults.plugins.legend.labels.color = legendColor;
+      }
+    }
+
+    Object.values(chartInstances).forEach(chart => {
+      if (!chart || !chart.options) return;
+
+      if (chart.options.scales) {
+        ['x', 'y', 'r'].forEach(axisKey => {
+          const axis = chart.options.scales[axisKey];
+          if (axis) {
+            if (axis.ticks) axis.ticks.color = ticksColor;
+            if (axis.grid) axis.grid.color = gridColor;
+            if (axis.pointLabels) axis.pointLabels.color = ticksColor;
+          }
+        });
+      }
+
+      if (chart.options.plugins && chart.options.plugins.legend && chart.options.plugins.legend.labels) {
+        chart.options.plugins.legend.labels.color = legendColor;
+      }
+
+      chart.update('none');
+    });
+  }
+
   function resizeAll() {
     Object.values(chartInstances).forEach(chart => {
       if (chart && typeof chart.resize === 'function') {
@@ -733,6 +775,7 @@
   global.SecureRegentCharts = {
     initAllCharts,
     updateAllCharts,
+    updateTheme,
     resizeAll,
     chartInstances
   };

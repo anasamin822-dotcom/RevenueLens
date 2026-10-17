@@ -166,6 +166,155 @@
     requestAnimationFrame(frame);
   }
 
+  // --- DaisyUI Radial Progress Ring Controller ---
+  function animateRadialProgress(fillId, textId, pct) {
+    const fill = document.getElementById(fillId);
+    const text = document.getElementById(textId);
+    const clamped = Math.max(0, Math.min(100, isNaN(pct) ? 0 : pct));
+    const circumference = 125.66; // 2 * PI * 20
+    const offset = circumference * (1 - clamped / 100);
+
+    if (fill) {
+      fill.style.strokeDasharray = `${circumference}`;
+      fill.style.strokeDashoffset = `${offset.toFixed(2)}`;
+    }
+
+    if (text) {
+      const startVal = parseFloat(text.getAttribute('data-val') || '0') || 0;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || text.offsetParent === null) {
+        text.textContent = `${Math.round(clamped)}%`;
+        text.setAttribute('data-val', clamped.toString());
+        return;
+      }
+      const startTime = performance.now();
+      const duration = 480;
+      function frame(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+        const cur = startVal + (clamped - startVal) * ease;
+        text.textContent = `${Math.round(cur)}%`;
+        if (progress < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          text.textContent = `${Math.round(clamped)}%`;
+          text.setAttribute('data-val', clamped.toString());
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+  }
+
+  // --- Real-Data SVG Sparkline Generator ---
+  function bucketDataSeries(items, dateField, valFn, from, to, bucketCount = 8) {
+    if (!from || !to) return new Array(bucketCount).fill(0);
+    const fTime = from.getTime();
+    const tTime = to.getTime();
+    const span = Math.max(1, tTime - fTime);
+    const step = span / bucketCount;
+
+    const buckets = new Array(bucketCount).fill(0);
+
+    items.forEach(item => {
+      const rawDate = item[dateField];
+      if (!rawDate) return;
+      const d = rawDate instanceof Date ? rawDate : new Date(rawDate);
+      const time = d.getTime();
+      if (time >= fTime && time <= tTime) {
+        let bIdx = Math.floor((time - fTime) / step);
+        if (bIdx >= bucketCount) bIdx = bucketCount - 1;
+        if (bIdx < 0) bIdx = 0;
+        buckets[bIdx] += (valFn ? valFn(item) : 1);
+      }
+    });
+
+    return buckets;
+  }
+
+  function renderSparkline(containerId, points, strokeColor = null) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    if (!points || points.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+
+    const width = 64;
+    const height = 20;
+    const padding = 2;
+    const w = width - padding * 2;
+    const h = height - padding * 2;
+
+    const min = Math.min(...points);
+    const max = Math.max(...points);
+    const range = (max - min) === 0 ? 1 : (max - min);
+
+    const step = points.length > 1 ? w / (points.length - 1) : w;
+    const coords = points.map((val, idx) => {
+      const x = padding + idx * step;
+      const y = height - padding - ((val - min) / range) * h;
+      return [x.toFixed(1), y.toFixed(1)];
+    });
+
+    const linePath = coords.map((c, i) => (i === 0 ? `M ${c[0]} ${c[1]}` : `L ${c[0]} ${c[1]}`)).join(' ');
+    const areaPath = `${linePath} L ${coords[coords.length - 1][0]} ${height} L ${coords[0][0]} ${height} Z`;
+
+    const strokeStyle = strokeColor ? `style="stroke: ${strokeColor};"` : '';
+    const fillStyle = strokeColor ? `style="fill: ${strokeColor}25;"` : '';
+
+    container.innerHTML = `
+      <svg class="kpi-sparkline" viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+        <path class="sparkline-area" d="${areaPath}" ${fillStyle} />
+        <path class="sparkline-line" d="${linePath}" ${strokeStyle} />
+      </svg>
+    `;
+  }
+
+  // --- Table Skeleton Shimmer Row Renderer ---
+  const tableRenderTimers = {};
+  let hasBootstrappedTables = false;
+
+  function showTableSkeleton(tbody, cols = 7, rowCount = 4) {
+    if (!tbody) return;
+    let html = '';
+    for (let r = 0; r < rowCount; r++) {
+      html += '<tr class="table-skeleton-row">';
+      for (let c = 0; c < cols; c++) {
+        const widthPct = 40 + ((r * 19 + c * 29) % 45);
+        html += `<td><div class="table-skeleton-bar" style="width: ${widthPct}%;"></div></td>`;
+      }
+      html += '</tr>';
+    }
+    tbody.innerHTML = html;
+  }
+
+  // --- Theme Controller (Light / Dark) with Persistent Storage ---
+  function initThemeToggle() {
+    const toggleBtn = document.getElementById('theme-toggle-btn');
+    if (!toggleBtn) return;
+
+    const activeTheme = document.documentElement.getAttribute('data-theme') || localStorage.getItem('sr_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', activeTheme);
+
+    toggleBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const nextTheme = current === 'dark' ? 'light' : 'dark';
+
+      document.documentElement.setAttribute('data-theme', nextTheme);
+      try {
+        localStorage.setItem('sr_theme', nextTheme);
+      } catch (e) {}
+
+      if (global.SecureRegentCharts && typeof global.SecureRegentCharts.updateTheme === 'function') {
+        global.SecureRegentCharts.updateTheme(nextTheme);
+      }
+
+      if (typeof global.setParticleTheme === 'function') {
+        global.setParticleTheme(nextTheme);
+      }
+    });
+  }
+
   // --- Originkit Text Scramble / Decrypt Effect ---
   const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!#@$%&';
   function scrambleText(element, finalText, duration = 380) {
@@ -441,6 +590,20 @@
       updateChip('chip-unqualified-leads', deltaUnqualified);
       updateChip('chip-conversion-rate', { dir: convRateDir }, `${convRateSign}${convRatePtChange.toFixed(1)}% pts`);
 
+      // Sparklines (real bucketed data)
+      const sparkTotal = bucketDataSeries(currLeads, 'createdAt', null, state.from, state.to);
+      const sparkQual = bucketDataSeries(currLeads.filter(l => l.status === 'Qualified'), 'createdAt', null, state.from, state.to);
+      const sparkConv = bucketDataSeries(currLeads.filter(l => l.status === 'Converted'), 'createdAt', null, state.from, state.to);
+      const sparkUnqual = bucketDataSeries(currLeads.filter(l => l.status === 'Unqualified'), 'createdAt', null, state.from, state.to);
+
+      renderSparkline('spark-total-leads', sparkTotal);
+      renderSparkline('spark-qualified-leads', sparkQual, '#0ea5e9');
+      renderSparkline('spark-converted-leads', sparkConv, '#10b981');
+      renderSparkline('spark-unqualified-leads', sparkUnqual, '#f43f5e');
+
+      // Animated SVG radial progress ring for Lead Conversion Rate
+      animateRadialProgress('radial-fill-conversion-rate', 'radial-text-conversion-rate', currConvRate);
+
       const label = document.getElementById('period-comparison-label');
       if (label) {
         label.textContent = `Comparing ${formatDate(state.from)} – ${formatDate(state.to)} vs prior (${formatDate(state.priorFrom)} – ${formatDate(state.priorTo)})`;
@@ -481,6 +644,15 @@
       updateChip('chip-accepted-quotes', calcPercentDelta(currQAccepted, priorQAccepted));
       updateChip('chip-quote-conv-rate', calcPercentDelta(currQConvRate, priorQConvRate));
 
+      // Sparklines for Quotes
+      const sparkQuotes = bucketDataSeries(currQuotes, 'createdAt', null, state.from, state.to);
+      const sparkQVal = bucketDataSeries(currQuotes, 'createdAt', q => q.amount, state.from, state.to);
+      const sparkQAcc = bucketDataSeries(currQuotes.filter(q => q.status === 'Accepted'), 'createdAt', null, state.from, state.to);
+
+      renderSparkline('spark-total-quotes', sparkQuotes);
+      renderSparkline('spark-quoted-value', sparkQVal, '#8b5cf6');
+      renderSparkline('spark-accepted-quotes', sparkQAcc, '#10b981');
+
       // 2. Deals Data
       const currDeals = getDealsInRange(state.from, state.to);
       const priorDeals = getDealsInRange(state.priorFrom, state.priorTo);
@@ -509,6 +681,17 @@
       updateChip('chip-won-revenue', calcPercentDelta(currWonRev, priorWonRev));
       updateChip('chip-collected-revenue', calcPercentDelta(currCollected, priorCollected));
       updateChip('chip-outstanding-revenue', calcPercentDelta(currOutstanding, priorOutstanding));
+
+      // Sparklines for Deals
+      const sparkDeals = bucketDataSeries(currDeals, 'createdAt', null, state.from, state.to);
+      const sparkWon = bucketDataSeries(wonDealsInRange, 'createdAt', d => d.value, state.from, state.to);
+      const sparkColl = bucketDataSeries(currPayments.filter(p => p.status === 'Paid'), 'date', p => p.amount, state.from, state.to);
+      const sparkOut = sparkWon.map((w, idx) => Math.max(0, w - (sparkColl[idx] || 0)));
+
+      renderSparkline('spark-total-deals', sparkDeals);
+      renderSparkline('spark-won-revenue', sparkWon, '#10b981');
+      renderSparkline('spark-collected-revenue', sparkColl, '#0ea5e9');
+      renderSparkline('spark-outstanding-revenue', sparkOut, '#f59e0b');
 
       if (qGrid) qGrid.classList.remove('is-loading');
       if (dGrid) dGrid.classList.remove('is-loading');
@@ -548,6 +731,18 @@
       updateChip('chip-order-completion-rate', calcPercentDelta(currOCompRate, priorOCompRate));
       updateChip('chip-order-payments-collected', calcPercentDelta(currPaidSum, priorPaidSum));
 
+      // Sparklines for Orders
+      const sparkOrders = bucketDataSeries(currOrders, 'createdAt', null, state.from, state.to);
+      const sparkOrdComp = bucketDataSeries(currOrders.filter(o => o.status === 'Completed'), 'createdAt', null, state.from, state.to);
+      const sparkOrdPay = bucketDataSeries(currPayments.filter(p => p.status === 'Paid'), 'date', p => p.amount, state.from, state.to);
+
+      renderSparkline('spark-total-orders', sparkOrders);
+      renderSparkline('spark-completed-orders', sparkOrdComp, '#10b981');
+      renderSparkline('spark-order-payments-collected', sparkOrdPay, '#10b981');
+
+      // Animated SVG radial progress ring for Order Completion Rate
+      animateRadialProgress('radial-fill-order-completion', 'radial-text-order-completion', currOCompRate);
+
       if (oGrid) oGrid.classList.remove('is-loading');
     }, 200);
   }
@@ -566,7 +761,7 @@
   }
 
   // --- SECTION 1: Leads Directory Table ---
-  function filterAndDisplayLeads() {
+  function filterAndDisplayLeads(withShimmer = false) {
     const tableBody = document.getElementById('leads-table-body');
     const countLabel = document.getElementById('table-leads-count-label');
     const paginationInfo = document.getElementById('table-pagination-info');
@@ -576,211 +771,255 @@
 
     if (!tableBody) return;
 
-    const searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
-    const statusFilter = statusSelect ? statusSelect.value : 'ALL';
-    const sourceFilter = sourceSelect ? sourceSelect.value : 'ALL';
+    if (tableRenderTimers['leads']) clearTimeout(tableRenderTimers['leads']);
 
-    const leadsInRange = getLeadsInRange(DashboardState.from, DashboardState.to);
+    const doRender = () => {
+      const searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      const statusFilter = statusSelect ? statusSelect.value : 'ALL';
+      const sourceFilter = sourceSelect ? sourceSelect.value : 'ALL';
 
-    const filtered = leadsInRange.filter(lead => {
-      const matchesSearch = !searchTerm || 
-        lead.name.toLowerCase().includes(searchTerm) || 
-        lead.company.toLowerCase().includes(searchTerm);
+      const leadsInRange = getLeadsInRange(DashboardState.from, DashboardState.to);
 
-      const matchesStatus = statusFilter === 'ALL' || lead.status === statusFilter;
-      const matchesSource = sourceFilter === 'ALL' || lead.source === sourceFilter;
+      const filtered = leadsInRange.filter(lead => {
+        const matchesSearch = !searchTerm || 
+          lead.name.toLowerCase().includes(searchTerm) || 
+          lead.company.toLowerCase().includes(searchTerm);
 
-      return matchesSearch && matchesStatus && matchesSource;
-    });
+        const matchesStatus = statusFilter === 'ALL' || lead.status === statusFilter;
+        const matchesSource = sourceFilter === 'ALL' || lead.source === sourceFilter;
 
-    if (countLabel) {
-      countLabel.textContent = `Showing ${filtered.length} leads in selected range`;
-    }
-
-    if (paginationInfo) {
-      paginationInfo.textContent = `Displaying ${filtered.length} of ${leadsInRange.length} total leads`;
-    }
-
-    if (filtered.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2.5rem; color: #94a3b8;">No leads match filters.</td></tr>`;
-      return;
-    }
-
-    tableBody.innerHTML = filtered.map(lead => `
-      <tr data-lead-id="${lead.id}">
-        <td>
-          <div class="lead-name-cell">
-            <span class="lead-primary-name">${lead.name}</span>
-            <span class="lead-company-sub">${lead.id}</span>
-          </div>
-        </td>
-        <td><strong>${lead.company}</strong></td>
-        <td>${lead.source}</td>
-        <td>${lead.serviceInterest}</td>
-        <td><span class="status-badge badge-${lead.status.toLowerCase()}">${lead.status}</span></td>
-        <td>${formatDate(lead.createdAt)}</td>
-        <td style="text-align: right;">
-          <button class="btn-row-action" data-lead-btn="${lead.id}">View Details →</button>
-        </td>
-      </tr>
-    `).join('');
-
-    tableBody.querySelectorAll('tr[data-lead-id]').forEach(row => {
-      row.addEventListener('click', () => {
-        global.openLeadDrilldown(row.getAttribute('data-lead-id'));
+        return matchesSearch && matchesStatus && matchesSource;
       });
-    });
 
-    tableBody.querySelectorAll('[data-lead-btn]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        global.openLeadDrilldown(btn.getAttribute('data-lead-btn'));
+      if (countLabel) {
+        countLabel.textContent = `Showing ${filtered.length} leads in selected range`;
+      }
+
+      if (paginationInfo) {
+        paginationInfo.textContent = `Displaying ${filtered.length} of ${leadsInRange.length} total leads`;
+      }
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 2.5rem; color: #94a3b8;">No leads match filters.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = filtered.map(lead => `
+        <tr data-lead-id="${lead.id}">
+          <td>
+            <div class="lead-name-cell">
+              <span class="lead-primary-name">${lead.name}</span>
+              <span class="lead-company-sub">${lead.id}</span>
+            </div>
+          </td>
+          <td><strong>${lead.company}</strong></td>
+          <td>${lead.source}</td>
+          <td>${lead.serviceInterest}</td>
+          <td><span class="status-badge badge-${lead.status.toLowerCase()}">${lead.status}</span></td>
+          <td>${formatDate(lead.createdAt)}</td>
+          <td style="text-align: right;">
+            <button class="btn-row-action" data-lead-btn="${lead.id}">View Details →</button>
+          </td>
+        </tr>
+      `).join('');
+
+      tableBody.querySelectorAll('tr[data-lead-id]').forEach(row => {
+        row.addEventListener('click', () => {
+          global.openLeadDrilldown(row.getAttribute('data-lead-id'));
+        });
       });
-    });
+
+      tableBody.querySelectorAll('[data-lead-btn]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          global.openLeadDrilldown(btn.getAttribute('data-lead-btn'));
+        });
+      });
+    };
+
+    if (withShimmer && hasBootstrappedTables && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      showTableSkeleton(tableBody, 7, 4);
+      tableRenderTimers['leads'] = setTimeout(doRender, 260);
+    } else {
+      doRender();
+    }
   }
 
   // --- SECTION 2: Quotations Table ---
-  function renderQuotationsTable(state) {
+  function renderQuotationsTable(state, withShimmer = false) {
     const tableBody = document.getElementById('quotations-table-body');
     if (!tableBody) return;
 
-    const quotes = getQuotationsInRange(state.from, state.to);
+    if (tableRenderTimers['quotes']) clearTimeout(tableRenderTimers['quotes']);
 
-    if (quotes.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">No quotations issued in this date range.</td></tr>`;
-      return;
+    const doRender = () => {
+      const quotes = getQuotationsInRange(state.from, state.to);
+
+      if (quotes.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">No quotations issued in this date range.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = quotes.map(q => {
+        const lead = LEADS.find(l => l.id === q.leadId);
+        const leadName = lead ? `${lead.name} (${lead.company})` : q.leadId;
+        return `
+          <tr data-lead-id="${q.leadId}">
+            <td><strong style="color: #6366f1;">${q.id}</strong></td>
+            <td>${leadName}</td>
+            <td>${q.service}</td>
+            <td>${q.category}</td>
+            <td><strong>${formatCurrencyINR(q.amount)}</strong></td>
+            <td><span class="status-badge badge-${q.status.toLowerCase()}">${q.status}</span></td>
+            <td>${formatDate(q.createdAt)}</td>
+            <td style="text-align: right;">
+              <button class="btn-row-action" data-lead-btn="${q.leadId}">Lead Drilldown →</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      tableBody.querySelectorAll('tr[data-lead-id]').forEach(row => {
+        row.addEventListener('click', () => {
+          global.openLeadDrilldown(row.getAttribute('data-lead-id'));
+        });
+      });
+
+      tableBody.querySelectorAll('[data-lead-btn]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          global.openLeadDrilldown(btn.getAttribute('data-lead-btn'));
+        });
+      });
+    };
+
+    if (withShimmer && hasBootstrappedTables && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      showTableSkeleton(tableBody, 8, 4);
+      tableRenderTimers['quotes'] = setTimeout(doRender, 260);
+    } else {
+      doRender();
     }
-
-    tableBody.innerHTML = quotes.map(q => {
-      const lead = LEADS.find(l => l.id === q.leadId);
-      const leadName = lead ? `${lead.name} (${lead.company})` : q.leadId;
-      return `
-        <tr data-lead-id="${q.leadId}">
-          <td><strong style="color: #6366f1;">${q.id}</strong></td>
-          <td>${leadName}</td>
-          <td>${q.service}</td>
-          <td>${q.category}</td>
-          <td><strong>${formatCurrencyINR(q.amount)}</strong></td>
-          <td><span class="status-badge badge-${q.status.toLowerCase()}">${q.status}</span></td>
-          <td>${formatDate(q.createdAt)}</td>
-          <td style="text-align: right;">
-            <button class="btn-row-action" data-lead-btn="${q.leadId}">Lead Drilldown →</button>
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-    tableBody.querySelectorAll('tr[data-lead-id]').forEach(row => {
-      row.addEventListener('click', () => {
-        global.openLeadDrilldown(row.getAttribute('data-lead-id'));
-      });
-    });
-
-    tableBody.querySelectorAll('[data-lead-btn]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        global.openLeadDrilldown(btn.getAttribute('data-lead-btn'));
-      });
-    });
   }
 
   // --- SECTION 2: Deals Progress Table ---
-  function renderDealsTable(state) {
+  function renderDealsTable(state, withShimmer = false) {
     const tableBody = document.getElementById('deals-table-body');
     if (!tableBody) return;
 
-    const deals = getDealsInRange(state.from, state.to);
+    if (tableRenderTimers['deals']) clearTimeout(tableRenderTimers['deals']);
 
-    if (deals.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">No deals active in this period.</td></tr>`;
-      return;
-    }
+    const doRender = () => {
+      const deals = getDealsInRange(state.from, state.to);
 
-    tableBody.innerHTML = deals.map(d => {
-      const lead = LEADS.find(l => l.id === d.leadId);
-      const leadCompany = lead ? lead.company : d.leadId;
-      return `
-        <tr data-lead-id="${d.leadId}">
-          <td><strong style="color: #6366f1;">${d.id}</strong></td>
-          <td>${leadCompany}</td>
-          <td>${d.service}</td>
-          <td><strong>${formatCurrencyINR(d.value)}</strong></td>
-          <td><span class="priority-chip priority-${d.priority.toLowerCase()}">${d.priority}</span></td>
-          <td><span class="status-badge badge-${d.status.toLowerCase().replace(' ', '-')}">${d.status}</span></td>
-          <td style="min-width: 140px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <div class="progress-bar-bg" style="flex: 1;">
-                <div class="progress-bar-fill ${d.status === 'Won' ? '' : 'fill-indigo'}" style="width: ${d.progress}%;"></div>
+      if (deals.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">No deals active in this period.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = deals.map(d => {
+        const lead = LEADS.find(l => l.id === d.leadId);
+        const leadCompany = lead ? lead.company : d.leadId;
+        return `
+          <tr data-lead-id="${d.leadId}">
+            <td><strong style="color: #6366f1;">${d.id}</strong></td>
+            <td>${leadCompany}</td>
+            <td>${d.service}</td>
+            <td><strong>${formatCurrencyINR(d.value)}</strong></td>
+            <td><span class="priority-chip priority-${d.priority.toLowerCase()}">${d.priority}</span></td>
+            <td><span class="status-badge badge-${d.status.toLowerCase().replace(' ', '-')}">${d.status}</span></td>
+            <td style="min-width: 140px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="progress-bar-bg" style="flex: 1;">
+                  <div class="progress-bar-fill ${d.status === 'Won' ? '' : 'fill-indigo'}" style="width: ${d.progress}%;"></div>
+                </div>
+                <span style="font-size: 0.75rem; font-weight: 600; color: #475569;">${d.progress}%</span>
               </div>
-              <span style="font-size: 0.75rem; font-weight: 600; color: #475569;">${d.progress}%</span>
-            </div>
-          </td>
-          <td style="text-align: right;">
-            <button class="btn-row-action" data-lead-btn="${d.leadId}">Lead Drilldown →</button>
-          </td>
-        </tr>
-      `;
-    }).join('');
+            </td>
+            <td style="text-align: right;">
+              <button class="btn-row-action" data-lead-btn="${d.leadId}">Lead Drilldown →</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
 
-    tableBody.querySelectorAll('tr[data-lead-id]').forEach(row => {
-      row.addEventListener('click', () => {
-        global.openLeadDrilldown(row.getAttribute('data-lead-id'));
+      tableBody.querySelectorAll('tr[data-lead-id]').forEach(row => {
+        row.addEventListener('click', () => {
+          global.openLeadDrilldown(row.getAttribute('data-lead-id'));
+        });
       });
-    });
 
-    tableBody.querySelectorAll('[data-lead-btn]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        global.openLeadDrilldown(btn.getAttribute('data-lead-btn'));
+      tableBody.querySelectorAll('[data-lead-btn]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          global.openLeadDrilldown(btn.getAttribute('data-lead-btn'));
+        });
       });
-    });
+    };
+
+    if (withShimmer && hasBootstrappedTables && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      showTableSkeleton(tableBody, 8, 4);
+      tableRenderTimers['deals'] = setTimeout(doRender, 260);
+    } else {
+      doRender();
+    }
   }
 
   // --- SECTION 3: Payments History Table ---
-  function renderPaymentsTable(state) {
+  function renderPaymentsTable(state, withShimmer = false) {
     const tableBody = document.getElementById('payments-table-body');
     if (!tableBody) return;
 
-    const payments = getPaymentsInRange(state.from, state.to);
+    if (tableRenderTimers['payments']) clearTimeout(tableRenderTimers['payments']);
 
-    if (payments.length === 0) {
-      tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">No payments recorded in this period.</td></tr>`;
-      return;
+    const doRender = () => {
+      const payments = getPaymentsInRange(state.from, state.to);
+
+      if (payments.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 2.5rem; color: #94a3b8;">No payments recorded in this period.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = payments.map(p => {
+        const deal = DEALS.find(d => d.id === p.dealId);
+        const leadId = deal ? deal.leadId : null;
+        return `
+          <tr ${leadId ? `data-lead-id="${leadId}"` : ''}>
+            <td><strong style="color: #6366f1;">${p.id}</strong></td>
+            <td>${p.dealId}</td>
+            <td>${p.orderId || '—'}</td>
+            <td><strong class="text-success">${formatCurrencyINR(p.amount)}</strong></td>
+            <td>${p.method}</td>
+            <td><span class="status-badge badge-${p.status.toLowerCase()}">${p.status}</span></td>
+            <td>${formatDate(p.date)}</td>
+            <td style="text-align: right;">
+              ${leadId ? `<button class="btn-row-action" data-lead-btn="${leadId}">Lead Drilldown →</button>` : '—'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      tableBody.querySelectorAll('tr[data-lead-id]').forEach(row => {
+        row.addEventListener('click', () => {
+          const lid = row.getAttribute('data-lead-id');
+          if (lid) global.openLeadDrilldown(lid);
+        });
+      });
+
+      tableBody.querySelectorAll('[data-lead-btn]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const lid = btn.getAttribute('data-lead-btn');
+          if (lid) global.openLeadDrilldown(lid);
+        });
+      });
+    };
+
+    if (withShimmer && hasBootstrappedTables && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      showTableSkeleton(tableBody, 8, 4);
+      tableRenderTimers['payments'] = setTimeout(doRender, 260);
+    } else {
+      doRender();
     }
-
-    tableBody.innerHTML = payments.map(p => {
-      const deal = DEALS.find(d => d.id === p.dealId);
-      const leadId = deal ? deal.leadId : null;
-      return `
-        <tr ${leadId ? `data-lead-id="${leadId}"` : ''}>
-          <td><strong style="color: #6366f1;">${p.id}</strong></td>
-          <td>${p.dealId}</td>
-          <td>${p.orderId || '—'}</td>
-          <td><strong class="text-success">${formatCurrencyINR(p.amount)}</strong></td>
-          <td>${p.method}</td>
-          <td><span class="status-badge badge-${p.status.toLowerCase()}">${p.status}</span></td>
-          <td>${formatDate(p.date)}</td>
-          <td style="text-align: right;">
-            ${leadId ? `<button class="btn-row-action" data-lead-btn="${leadId}">Lead Drilldown →</button>` : '—'}
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-    tableBody.querySelectorAll('tr[data-lead-id]').forEach(row => {
-      row.addEventListener('click', () => {
-        const lid = row.getAttribute('data-lead-id');
-        if (lid) global.openLeadDrilldown(lid);
-      });
-    });
-
-    tableBody.querySelectorAll('[data-lead-btn]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const lid = btn.getAttribute('data-lead-btn');
-        if (lid) global.openLeadDrilldown(lid);
-      });
-    });
   }
 
   // --- Table Filters Listeners ---
@@ -789,9 +1028,9 @@
     const statusSelect = document.getElementById('table-status-filter');
     const sourceSelect = document.getElementById('table-source-filter');
 
-    if (searchInput) searchInput.addEventListener('input', filterAndDisplayLeads);
-    if (statusSelect) statusSelect.addEventListener('change', filterAndDisplayLeads);
-    if (sourceSelect) sourceSelect.addEventListener('change', filterAndDisplayLeads);
+    if (searchInput) searchInput.addEventListener('input', () => filterAndDisplayLeads(false));
+    if (statusSelect) statusSelect.addEventListener('change', () => filterAndDisplayLeads(true));
+    if (sourceSelect) sourceSelect.addEventListener('change', () => filterAndDisplayLeads(true));
   }
 
   // --- Date Filter Setup ---
@@ -888,10 +1127,10 @@
     DashboardState.subscribe(renderQuotationsAndDealsKPIs);
     DashboardState.subscribe(renderOrdersAndPaymentsKPIs);
     DashboardState.subscribe(renderAllCharts);
-    DashboardState.subscribe(filterAndDisplayLeads);
-    DashboardState.subscribe(renderQuotationsTable);
-    DashboardState.subscribe(renderDealsTable);
-    DashboardState.subscribe(renderPaymentsTable);
+    DashboardState.subscribe(state => filterAndDisplayLeads(true));
+    DashboardState.subscribe(state => renderQuotationsTable(state, true));
+    DashboardState.subscribe(state => renderDealsTable(state, true));
+    DashboardState.subscribe(state => renderPaymentsTable(state, true));
 
     // 4. Initialize DOM Event Listeners
     initFilterBar();
@@ -901,9 +1140,22 @@
     initRippleEffects();
     initAuroraGovernor();
     initTableFilterListeners();
+    initThemeToggle();
 
-    // 5. Initial Render
+    // 5. Initial Render (Instant on first paint, shimmer on subsequent filter changes)
     DashboardState.notify();
+    hasBootstrappedTables = true;
+
+    // 6. Synchronize initial theme if dark
+    const initialTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    if (initialTheme === 'dark') {
+      if (global.SecureRegentCharts && typeof global.SecureRegentCharts.updateTheme === 'function') {
+        global.SecureRegentCharts.updateTheme('dark');
+      }
+      if (typeof global.setParticleTheme === 'function') {
+        global.setParticleTheme('dark');
+      }
+    }
   }
 
   if (document.readyState === 'loading') {

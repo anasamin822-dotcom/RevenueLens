@@ -82,6 +82,63 @@
   --transition-drawer: 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+[data-theme="dark"] {
+  /* Surfaces & Canvas (Dark Obsidian & Slate) */
+  --bg-canvas: #0b0f19;
+  --bg-card: rgba(17, 24, 39, 0.72);
+  --bg-card-subtle: rgba(30, 41, 59, 0.6);
+  --bg-card-hover: rgba(30, 41, 59, 0.85);
+  --bg-surface: #111827;
+
+  /* Glass Borders & Inner Highlighting */
+  --border-subtle: rgba(51, 65, 85, 0.7);
+  --border-medium: rgba(71, 85, 105, 0.8);
+  --border-focus: #818cf8;
+  --border-glass: rgba(255, 255, 255, 0.09);
+  --border-glass-hover: rgba(129, 140, 248, 0.45);
+  --inner-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+
+  /* High-Contrast Slate Typography */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  /* Accent Colorways */
+  --accent-primary: #818cf8;
+  --accent-primary-hover: #6366f1;
+  --accent-light: rgba(129, 140, 248, 0.14);
+  --accent-glow: rgba(129, 140, 248, 0.28);
+
+  /* Status Colors (Dark mode adjusted) */
+  --status-success: #10b981;
+  --status-success-bg: rgba(16, 185, 129, 0.16);
+  --status-success-border: rgba(16, 185, 129, 0.35);
+
+  --status-danger: #f43f5e;
+  --status-danger-bg: rgba(244, 63, 94, 0.16);
+  --status-danger-border: rgba(244, 63, 94, 0.35);
+
+  --status-warning: #f59e0b;
+  --status-warning-bg: rgba(245, 158, 11, 0.16);
+  --status-warning-border: rgba(245, 158, 11, 0.35);
+
+  --status-info: #38bdf8;
+  --status-info-bg: rgba(56, 189, 248, 0.16);
+  --status-info-border: rgba(56, 189, 248, 0.35);
+
+  --status-neutral: #94a3b8;
+  --status-neutral-bg: rgba(51, 65, 85, 0.4);
+
+  /* Glass Shadow Stack */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.4), 0 2px 6px -1px rgba(0, 0, 0, 0.25);
+  --shadow-hover: 0 14px 34px -4px rgba(0, 0, 0, 0.5), 0 0 20px -2px rgba(99, 102, 241, 0.25);
+  --shadow-glass: 0 8px 30px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-glass-hover: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(129, 140, 248, 0.25);
+  --shadow-dropdown: 0 14px 36px -4px rgba(0, 0, 0, 0.6);
+  --shadow-drawer: -12px 0 40px rgba(0, 0, 0, 0.6);
+}
+
 /* CSS Reset */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -941,8 +998,88 @@ body.bg-canvas {
 .kpi-footer {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.kpi-sparkline-wrap {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  width: 64px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.kpi-sparkline {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.sparkline-line {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sparkline-area {
+  fill: var(--accent-light);
+  stroke: none;
+}
+
+/* DaisyUI Radial Progress Ring */
+.radial-progress-wrap {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.radial-progress-wrap svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.radial-track {
+  fill: none;
+  stroke: var(--border-subtle);
+  stroke-width: 4.5;
+}
+
+.radial-fill {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  stroke-dasharray: 125.66;
+  stroke-dashoffset: 125.66;
+  transition: stroke-dashoffset 0.85s cubic-bezier(0.16, 1, 0.3, 1), stroke var(--transition-fast);
+}
+
+.radial-fill.fill-purple {
+  stroke: #9333ea;
+}
+
+.radial-fill.fill-emerald {
+  stroke: var(--status-success);
+}
+
+.radial-center-val {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+  pointer-events: none;
 }
 
 /* Delta Badges / Percentage Change Chips */
@@ -1213,7 +1350,12 @@ body.bg-canvas {
 }
 
 .leads-table th {
-  background: var(--bg-card-subtle);
+  background: rgba(248, 250, 252, 0.96);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 2;
   color: var(--text-muted);
   font-weight: 600;
   font-size: 0.72rem;
@@ -1222,6 +1364,11 @@ body.bg-canvas {
   padding: 0.65rem 0.75rem;
   border-bottom: 1px solid var(--border-subtle);
   white-space: nowrap;
+}
+
+[data-theme="dark"] .leads-table th {
+  background: rgba(17, 24, 39, 0.96);
+  color: var(--text-muted);
 }
 
 .leads-table th:first-child { border-top-left-radius: var(--radius-sm); }
@@ -1247,12 +1394,45 @@ body.bg-canvas {
 }
 
 .leads-table tbody tr {
-  transition: background-color var(--transition-fast);
+  transition: transform var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
   cursor: pointer;
 }
 
+.leads-table tbody tr:nth-child(even) {
+  background-color: rgba(241, 245, 249, 0.35);
+}
+
+[data-theme="dark"] .leads-table tbody tr:nth-child(even) {
+  background-color: rgba(30, 41, 59, 0.25);
+}
+
 .leads-table tbody tr:hover {
-  background-color: rgba(241, 245, 249, 0.7);
+  background-color: rgba(241, 245, 249, 0.75);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+[data-theme="dark"] .leads-table tbody tr:hover {
+  background-color: rgba(51, 65, 85, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Skeleton shimmer rows for tables */
+.table-skeleton-row td {
+  padding: 0.85rem 0.75rem !important;
+}
+
+.table-skeleton-bar {
+  height: 14px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, rgba(226, 232, 240, 0.5) 25%, rgba(203, 213, 225, 0.8) 50%, rgba(226, 232, 240, 0.5) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s infinite ease-in-out;
+}
+
+[data-theme="dark"] .table-skeleton-bar {
+  background: linear-gradient(90deg, rgba(51, 65, 85, 0.5) 25%, rgba(71, 85, 105, 0.8) 50%, rgba(51, 65, 85, 0.5) 75%);
+  background-size: 200% 100%;
 }
 
 .leads-table td strong {
@@ -1281,51 +1461,67 @@ body.bg-canvas {
   color: var(--text-muted);
 }
 
-/* Status Badges */
+/* DaisyUI Status Pill Badges */
+.badge,
 .status-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  justify-content: center;
+  padding: 3px 10px;
   border-radius: var(--radius-full);
   font-size: 0.72rem;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.25;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
 }
 
 .badge-new {
   background: #f1f5f9;
   color: #475569;
-  border: 1px solid #cbd5e1;
+  border-color: #cbd5e1;
+}
+
+[data-theme="dark"] .badge-new {
+  background: rgba(51, 65, 85, 0.4);
+  color: #cbd5e1;
+  border-color: rgba(71, 85, 105, 0.6);
 }
 
 .badge-qualified {
   background: var(--status-info-bg);
   color: var(--status-info);
-  border: 1px solid var(--status-info-border);
+  border-color: var(--status-info-border);
 }
 
 .badge-converted, .badge-accepted, .badge-won, .badge-completed, .badge-paid {
   background: var(--status-success-bg);
   color: var(--status-success);
-  border: 1px solid var(--status-success-border);
+  border-color: var(--status-success-border);
 }
 
 .badge-unqualified, .badge-rejected, .badge-lost, .badge-cancelled {
   background: var(--status-danger-bg);
   color: var(--status-danger);
-  border: 1px solid var(--status-danger-border);
+  border-color: var(--status-danger-border);
 }
 
 .badge-draft, .badge-pending {
   background: var(--status-warning-bg);
   color: var(--status-warning);
-  border: 1px solid var(--status-warning-border);
+  border-color: var(--status-warning-border);
 }
 
 .badge-in-progress, .badge-sent {
   background: var(--accent-light);
   color: var(--accent-primary);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.25);
+}
+
+[data-theme="dark"] .badge-in-progress,
+[data-theme="dark"] .badge-sent {
+  border-color: rgba(129, 140, 248, 0.4);
 }
 
 .btn-row-action {
@@ -1581,16 +1777,24 @@ body.bg-canvas {
 }
 
 .priority-chip {
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
   font-size: 0.68rem;
   font-weight: 700;
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid transparent;
+  line-height: 1.2;
 }
 
-.priority-high { background: #fee2e2; color: #dc2626; }
-.priority-medium { background: #fef3c7; color: #d97706; }
-.priority-low { background: #f1f5f9; color: #64748b; }
+.priority-high { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+.priority-medium { background: #fef3c7; color: #d97706; border-color: #fde68a; }
+.priority-low { background: #f1f5f9; color: #64748b; border-color: #cbd5e1; }
+
+[data-theme="dark"] .priority-high { background: rgba(239, 68, 68, 0.16); color: #f87171; border-color: rgba(239, 68, 68, 0.35); }
+[data-theme="dark"] .priority-medium { background: rgba(245, 158, 11, 0.16); color: #fbbf24; border-color: rgba(245, 158, 11, 0.35); }
+[data-theme="dark"] .priority-low { background: rgba(100, 116, 139, 0.2); color: #94a3b8; border-color: rgba(100, 116, 139, 0.4); }
 
 .dd-progress-wrap {
   display: flex;
@@ -1610,19 +1814,21 @@ body.bg-canvas {
 .progress-bar-bg {
   width: 100%;
   height: 6px;
-  background: #e2e8f0;
+  background: var(--border-subtle);
   border-radius: var(--radius-full);
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--status-success);
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
   border-radius: var(--radius-full);
+  transition: width 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
 }
 
 .fill-indigo {
-  background: var(--accent-primary) !important;
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%) !important;
 }
 
 .dd-empty {
@@ -1843,6 +2049,179 @@ body.bg-canvas {
     padding: 0.35rem 0.45rem;
     font-size: 0.7rem;
   }
+}
+
+/* ==========================================================================
+   DaisyUI Glass Tooltip System
+   ========================================================================== */
+[data-tip] {
+  position: relative;
+}
+
+[data-tip]::before,
+[data-tip]::after {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 200;
+}
+
+[data-tip]::before {
+  content: attr(data-tip);
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  box-shadow: var(--shadow-dropdown);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+[data-tip]::after {
+  content: '';
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  border: 4px solid transparent;
+  border-top-color: rgba(15, 23, 42, 0.92);
+}
+
+[data-tip]:hover::before,
+[data-tip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+[data-theme="dark"] [data-tip]::before {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+[data-theme="dark"] [data-tip]::after {
+  border-top-color: rgba(30, 41, 59, 0.95);
+}
+
+/* ==========================================================================
+   Theme Toggle Switch Button
+   ========================================================================== */
+.theme-toggle-btn {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+  outline: none;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .theme-toggle-btn {
+  background: var(--bg-card);
+  border-color: var(--border-subtle);
+  color: #fbbf24;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  transform: scale(1.05);
+}
+
+[data-theme="dark"] .theme-toggle-btn:hover {
+  color: #fde047;
+}
+
+.theme-toggle-btn .sun-icon {
+  display: block;
+}
+
+.theme-toggle-btn .moon-icon {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle-btn .sun-icon {
+  display: none !important;
+}
+
+[data-theme="dark"] .theme-toggle-btn .moon-icon {
+  display: block !important;
+}
+
+/* Dark theme layout surface overrides */
+[data-theme="dark"] .sidebar {
+  background: rgba(15, 23, 42, 0.88);
+  border-right-color: var(--border-subtle);
+}
+
+[data-theme="dark"] .dashboard-header {
+  background: rgba(15, 23, 42, 0.78);
+  border-bottom-color: var(--border-subtle);
+}
+
+[data-theme="dark"] .filter-presets {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: var(--border-subtle);
+}
+
+[data-theme="dark"] .filter-preset-btn.active {
+  background: rgba(51, 65, 85, 0.95);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .custom-range-panel {
+  background: rgba(15, 23, 42, 0.96);
+  border-color: var(--border-medium);
+}
+
+[data-theme="dark"] .drilldown-drawer {
+  background: rgba(15, 23, 42, 0.94);
+  border-left-color: var(--border-subtle);
+}
+
+[data-theme="dark"] .dd-header {
+  background: rgba(15, 23, 42, 0.75);
+}
+
+[data-theme="dark"] .dd-meta-ribbon {
+  background: rgba(30, 41, 59, 0.6);
+}
+
+[data-theme="dark"] .dd-rollup-strip {
+  background: rgba(15, 23, 42, 0.5);
+}
+
+[data-theme="dark"] .rollup-box,
+[data-theme="dark"] .dd-item-card {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: var(--border-subtle);
+}
+
+[data-theme="dark"] .input-field input[type="date"],
+[data-theme="dark"] .search-input-wrap input,
+[data-theme="dark"] .table-select {
+  background: rgba(30, 41, 59, 0.7);
+  color: var(--text-primary);
+  border-color: var(--border-subtle);
+}
+
+[data-theme="dark"] .system-status-card {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: var(--border-subtle);
 }
 
 /* ==========================================================================

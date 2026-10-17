@@ -7,13 +7,28 @@
 (function (global) {
   'use strict';
 
-  // --- Palette: Soft theme-aligned tints ---
-  const PALETTE = [
+  // --- Palette: Soft theme-aligned tints for Light and Dark modes ---
+  const LIGHT_PALETTE = [
     { r: 99, g: 102, b: 241, a: 0.32 },  // Soft Indigo
     { r: 139, g: 92, b: 246, a: 0.32 }, // Soft Violet
     { r: 6, g: 182, b: 212, a: 0.28 },  // Soft Cyan
     { r: 168, g: 85, b: 247, a: 0.28 }  // Lavender
   ];
+
+  const DARK_PALETTE = [
+    { r: 129, g: 140, b: 248, a: 0.45 }, // Neon Indigo
+    { r: 192, g: 132, b: 252, a: 0.45 }, // Neon Purple
+    { r: 56, g: 189, b: 248, a: 0.40 },  // Neon Sky
+    { r: 236, g: 72, b: 153, a: 0.38 }   // Neon Pink
+  ];
+
+  function getTheme() {
+    return (document.documentElement && document.documentElement.getAttribute('data-theme') === 'dark') ? 'dark' : 'light';
+  }
+
+  function getActivePalette(theme) {
+    return (theme || getTheme()) === 'dark' ? DARK_PALETTE : LIGHT_PALETTE;
+  }
 
   // Helper: check reduced motion
   function isReducedMotion() {
@@ -39,6 +54,9 @@
       this.dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       this.animId = null;
       this.isRunning = false;
+
+      this.theme = getTheme();
+      this.lineColor = this.theme === 'dark' ? '129, 140, 248' : '99, 102, 241';
 
       this.mouse = {
         x: -9999,
@@ -70,9 +88,10 @@
 
     createParticles() {
       const count = this.getTargetCount();
+      const palette = getActivePalette(this.theme);
       this.particles = [];
       for (let i = 0; i < count; i++) {
-        const color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+        const color = palette[Math.floor(Math.random() * palette.length)];
         this.particles.push({
           x: Math.random() * this.width,
           y: Math.random() * this.height,
@@ -219,7 +238,7 @@
             this.ctx.beginPath();
             this.ctx.moveTo(p1.x, p1.y);
             this.ctx.lineTo(p2.x, p2.y);
-            this.ctx.strokeStyle = `rgba(99, 102, 241, ${alpha})`;
+            this.ctx.strokeStyle = `rgba(${this.lineColor}, ${alpha})`;
             this.ctx.lineWidth = 0.85;
             this.ctx.stroke();
           }
@@ -239,6 +258,18 @@
 
       // Reset shadow for next tick
       this.ctx.shadowBlur = 0;
+    }
+
+    setTheme(theme) {
+      this.theme = theme;
+      this.lineColor = theme === 'dark' ? '129, 140, 248' : '99, 102, 241';
+      const palette = getActivePalette(theme);
+      this.particles.forEach(p => {
+        p.color = palette[Math.floor(Math.random() * palette.length)];
+      });
+      if (isReducedMotion()) {
+        this.renderStaticFrame();
+      }
     }
 
     step() {
@@ -280,6 +311,8 @@
       this.animId = null;
       this.isRunning = false;
       this.mouse = { x: -999, y: -999, isHover: false };
+      this.theme = getTheme();
+      this.lineColor = this.theme === 'dark' ? '192, 132, 252' : '139, 92, 246';
 
       this.init();
     }
@@ -310,9 +343,10 @@
 
     createBurstParticles() {
       const count = window.innerWidth < 768 ? 16 : 28;
+      const palette = getActivePalette(this.theme);
       this.particles = [];
       for (let i = 0; i < count; i++) {
-        const color = PALETTE[i % PALETTE.length];
+        const color = palette[i % palette.length];
         this.particles.push({
           x: Math.random() * this.width,
           y: Math.random() * this.height,
@@ -362,11 +396,12 @@
       const rect = this.card.getBoundingClientRect();
       const originX = clientX - rect.left;
       const originY = clientY - rect.top;
+      const palette = getActivePalette(this.theme);
 
       for (let i = 0; i < count; i++) {
         const angle = Math.random() * Math.PI * 2;
         const speed = 1.0 + Math.random() * 2.2;
-        const color = PALETTE[Math.floor(Math.random() * PALETTE.length)];
+        const color = palette[Math.floor(Math.random() * palette.length)];
 
         this.particles.push({
           x: originX,
@@ -438,7 +473,7 @@
             this.ctx.beginPath();
             this.ctx.moveTo(p1.x, p1.y);
             this.ctx.lineTo(p2.x, p2.y);
-            this.ctx.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
+            this.ctx.strokeStyle = `rgba(${this.lineColor}, ${alpha})`;
             this.ctx.lineWidth = 0.7;
             this.ctx.stroke();
           }
@@ -453,6 +488,15 @@
         this.ctx.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${p.alpha})`;
         this.ctx.fill();
       }
+    }
+
+    setTheme(theme) {
+      this.theme = theme;
+      this.lineColor = theme === 'dark' ? '192, 132, 252' : '139, 92, 246';
+      const palette = getActivePalette(theme);
+      this.particles.forEach(p => {
+        p.color = palette[Math.floor(Math.random() * palette.length)];
+      });
     }
 
     step() {
@@ -487,6 +531,17 @@
     const heroBurst = new HeroBannerBurst('hero-funnel-card', 'hero-burst-canvas');
     global.heroParticles = heroBurst;
   }
+
+  function setParticleTheme(theme) {
+    if (global.ambientParticles && typeof global.ambientParticles.setTheme === 'function') {
+      global.ambientParticles.setTheme(theme);
+    }
+    if (global.heroParticles && typeof global.heroParticles.setTheme === 'function') {
+      global.heroParticles.setTheme(theme);
+    }
+  }
+
+  global.setParticleTheme = setParticleTheme;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initParticles);
