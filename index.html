@@ -27,6 +27,7 @@
     <div class="aurora-blob aurora-blob-2"></div>
     <div class="aurora-blob aurora-blob-3"></div>
     <div class="ambient-noise"></div>
+    <canvas id="particle-canvas" class="particle-canvas" aria-hidden="true"></canvas>
   </div>
 
   <div class="app-layout">
@@ -280,7 +281,8 @@
             <div class="charts-bento-grid">
               
               <!-- Funnel -->
-              <div class="bento-card spotlight-card beam-card" data-spotlight>
+              <div class="bento-card spotlight-card beam-card" data-spotlight id="hero-funnel-card">
+                <canvas id="hero-burst-canvas" class="hero-burst-canvas" aria-hidden="true"></canvas>
                 <div class="card-title-row">
                   <div>
                     <h4 class="card-title">Lead Progression Funnel</h4>
@@ -1017,6 +1019,7 @@
   <script src="js/data.js"></script>
   <script src="js/charts.js"></script>
   <script src="js/drilldown.js"></script>
+  <script src="js/particles.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

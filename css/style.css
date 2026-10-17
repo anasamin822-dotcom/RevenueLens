@@ -177,6 +177,32 @@ body.bg-canvas {
   pointer-events: none;
 }
 
+/* Ambient Connected Particle Network Canvas */
+.particle-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Localized Hero Banner Particle Burst Canvas */
+.hero-burst-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+
+#hero-funnel-card > *:not(.hero-burst-canvas) {
+  position: relative;
+  z-index: 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .aurora-blob {
     animation: none !important;
@@ -1842,5 +1868,9 @@ body.bg-canvas {
     animation: none !important;
     transition: none !important;
     transform: none !important;
+  }
+
+  .hero-burst-canvas {
+    display: none !important;
   }
 }
