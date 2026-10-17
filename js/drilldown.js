@@ -197,6 +197,11 @@
     if (drawer) drawer.classList.add('open');
     if (backdrop) backdrop.classList.add('open');
     document.body.style.overflow = 'hidden';
+
+    // Apply magnetic hover to drawer close button
+    if (typeof global.initMagneticButtons === 'function') {
+      global.initMagneticButtons();
+    }
   }
 
   global.openLeadDrilldown = openLeadDrilldown;

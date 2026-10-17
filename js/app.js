@@ -395,7 +395,7 @@
     if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const targets = document.querySelectorAll('.filter-preset-btn, .apply-range-btn, .btn-row-action');
+    const targets = document.querySelectorAll('.filter-preset-btn, .apply-range-btn, .btn-row-action, .dd-close-btn');
     targets.forEach(btn => {
       if (btn._hasMagneticListener) return;
       btn._hasMagneticListener = true;
@@ -414,6 +414,7 @@
       });
     });
   }
+  global.initMagneticButtons = initMagneticButtons;
 
   // --- Click Ripple Wave Effect ---
   function initRippleEffects() {
@@ -1105,6 +1106,107 @@
     });
   }
 
+  // --- Page-Load Sequence: Brief Branded Intro (<1s, skippable, sessionStorage cached) ---
+  function initBrandedIntro() {
+    const overlay = document.getElementById('brand-intro-overlay');
+    if (!overlay) return;
+
+    const alreadySeen = sessionStorage.getItem('sr_intro_seen');
+    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function dismissIntro() {
+      if (!overlay || overlay._dismissed) return;
+      overlay._dismissed = true;
+      try {
+        sessionStorage.setItem('sr_intro_seen', '1');
+      } catch (e) {}
+      overlay.classList.add('fade-out');
+      setTimeout(() => {
+        if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, 230);
+    }
+
+    if (alreadySeen || prefersReduced) {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      return;
+    }
+
+    overlay.addEventListener('click', dismissIntro);
+    const skipBtn = document.getElementById('intro-skip-btn');
+    if (skipBtn) {
+      skipBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        dismissIntro();
+      });
+    }
+
+    const escHandler = e => {
+      if (e.key === 'Escape') {
+        dismissIntro();
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
+
+    // Particle convergence inward toward logo mark
+    const canvas = document.getElementById('intro-particle-canvas');
+    if (canvas && canvas.getContext) {
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width || 180;
+      const h = canvas.height || 180;
+      const cx = w / 2;
+      const cy = h / 2;
+      const count = 28;
+      const particles = [];
+      const isDark = (document.documentElement.getAttribute('data-theme') === 'dark');
+      const baseColors = isDark 
+        ? ['rgba(129, 140, 248, 0.75)', 'rgba(192, 132, 252, 0.75)', 'rgba(56, 189, 248, 0.65)']
+        : ['rgba(99, 102, 241, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(6, 182, 212, 0.6)'];
+
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 55 + Math.random() * 32;
+        particles.push({
+          angle,
+          dist,
+          targetDist: 18 + Math.random() * 10,
+          radius: 1.4 + Math.random() * 1.8,
+          color: baseColors[i % baseColors.length]
+        });
+      }
+
+      let start = null;
+      function animateAssemble(timestamp) {
+        if (overlay._dismissed) return;
+        if (!start) start = timestamp;
+        const progress = Math.min((timestamp - start) / 520, 1);
+        ctx.clearRect(0, 0, w, h);
+
+        const ease = 1 - Math.pow(1 - progress, 3);
+        for (let i = 0; i < count; i++) {
+          const p = particles[i];
+          const curDist = p.dist - (p.dist - p.targetDist) * ease;
+          const curAngle = p.angle + (1 - ease) * 0.35;
+          const x = cx + Math.cos(curAngle) * curDist;
+          const y = cy + Math.sin(curAngle) * curDist;
+
+          ctx.beginPath();
+          ctx.arc(x, y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(animateAssemble);
+        }
+      }
+      requestAnimationFrame(animateAssemble);
+    }
+
+    // Automatically dismiss at 750ms (<1s total)
+    setTimeout(dismissIntro, 750);
+  }
+
   // --- Application Bootstrap ---
   function initDashboard() {
     // 1. Initial State
@@ -1141,6 +1243,7 @@
     initAuroraGovernor();
     initTableFilterListeners();
     initThemeToggle();
+    initBrandedIntro();
 
     // 5. Initial Render (Instant on first paint, shimmer on subsequent filter changes)
     DashboardState.notify();

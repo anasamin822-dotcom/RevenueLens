@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SecureRegent — Business Performance & Revenue Analytics</title>
   <meta name="description" content="Interactive Bento Grid analytics dashboard tracking leads, quotations, deals, orders and revenue for services businesses.">
+  <link rel="canonical" href="./index.html">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0b0f19" media="(prefers-color-scheme: dark)">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="SecureRegent — Business Performance & Revenue Analytics">
+  <meta property="og:description" content="Interactive Bento Grid analytics dashboard tracking leads, quotations, deals, orders and revenue for services businesses.">
+  <meta property="og:image" content="./assets/og-preview.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SecureRegent — Business Performance & Revenue Analytics">
+  <meta name="twitter:description" content="Interactive Bento Grid analytics dashboard tracking leads, quotations, deals, orders and revenue for services businesses.">
+  <meta name="twitter:image" content="./assets/og-preview.png">
 
   <!-- Favicon (Inline SVG Data URI) -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
@@ -20,17 +35,38 @@
   <!-- Core Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Anti-flash Theme Initializer (Defaults to light theme) -->
+  <!-- Anti-flash Theme & Intro Initializer -->
   <script>
     (function () {
       try {
         var theme = localStorage.getItem('sr_theme') || 'light';
         document.documentElement.setAttribute('data-theme', theme);
+        if (sessionStorage.getItem('sr_intro_seen') || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+          document.documentElement.classList.add('no-intro');
+        }
       } catch (e) {}
     })();
   </script>
 </head>
 <body class="bg-canvas">
+  <!-- Page-Load Sequence: Brief branded intro with particle assemble (<1s, skippable, sessionStorage cached) -->
+  <div id="brand-intro-overlay" class="brand-intro-overlay" aria-hidden="true">
+    <div class="intro-backdrop"></div>
+    <div class="intro-content">
+      <div class="intro-logo-wrap">
+        <canvas id="intro-particle-canvas" class="intro-particle-canvas" width="180" height="180"></canvas>
+        <div class="intro-logo-mark">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+      </div>
+      <div class="intro-brand-name">SecureRegent</div>
+      <div class="intro-tagline">Analytics Engine</div>
+    </div>
+    <button class="intro-skip-btn" id="intro-skip-btn" type="button" aria-label="Skip Intro">Skip ✕</button>
+  </div>
+
   <!-- Ambient Aurora Drift & Film Grain Overlay -->
   <div class="ambient-aurora-wrap" aria-hidden="true">
     <div class="aurora-blob aurora-blob-1"></div>
