@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RevenueLens — Business Performance & Revenue Analytics</title>
+  <title>RevenueLens - Business Performance & Revenue Analytics</title>
   <meta name="description" content="Interactive Bento Grid analytics dashboard tracking leads, quotations, deals, orders and revenue for services businesses.">
   <link rel="canonical" href="./index.html">
   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
@@ -11,13 +11,13 @@
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="RevenueLens — Business Performance & Revenue Analytics">
+  <meta property="og:title" content="RevenueLens - Business Performance & Revenue Analytics">
   <meta property="og:description" content="Interactive Bento Grid analytics dashboard tracking leads, quotations, deals, orders and revenue for services businesses.">
   <meta property="og:image" content="./assets/og-preview.png">
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="RevenueLens — Business Performance & Revenue Analytics">
+  <meta name="twitter:title" content="RevenueLens - Business Performance & Revenue Analytics">
   <meta name="twitter:description" content="Interactive Bento Grid analytics dashboard tracking leads, quotations, deals, orders and revenue for services businesses.">
   <meta name="twitter:image" content="./assets/og-preview.png">
 
@@ -34,6 +34,7 @@
 
   <!-- Core Stylesheet -->
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/studio.css">
 
   <!-- Anti-flash Theme & Intro Initializer -->
   <script>
@@ -137,9 +138,9 @@
         <div class="system-status-card">
           <div class="status-indicator">
             <span class="pulse-dot"></span>
-            <span>Static Engine Online</span>
+            <span>Sample workspace</span>
           </div>
-          <p class="status-meta">Oct 17, 2026 • 182 Leads Loaded</p>
+          <p class="status-meta">Sample records • Not your business data</p>
         </div>
       </div>
     </aside>
@@ -206,6 +207,10 @@
         </div>
       </header>
 
+      <section class="studio-hero" aria-labelledby="studio-title">
+        <div class="studio-copy"><span class="studio-eyebrow">THE REVENUE STUDIO / 01</span><h1 id="studio-title">A clearer view.<br><em>A smarter next move.</em></h1><p>Your pipeline, orders and revenue. One connected picture, from first conversation to final payment.</p><div class="studio-chips"><span>Leads → Deals → Revenue</span><span>Private by design</span></div></div>
+        <div class="revenue-sculpture" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="sculpture-base"></div><div class="glass-bar bar-one"></div><div class="glass-bar bar-two"></div><div class="glass-bar bar-three"></div><div class="floating-note"><span>FIND THE SIGNAL</span><strong>RevenueLens</strong><i>Clarity, at every stage.</i></div></div>
+      </section>
       <!-- Main Dashboard Canvas -->
       <main class="dashboard-content" id="dashboard-content">
         
@@ -1112,5 +1117,7 @@
   <script src="js/drilldown.js"></script>
   <script src="js/particles.js"></script>
   <script src="js/app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.js"></script>
+<script src="js/workspace.js"></script>
 </body>
 </html>
