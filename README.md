@@ -1,9 +1,9 @@
-# SecureRegent — Business Performance & Revenue Analytics Dashboard
+# RevenueLens — Business Performance & Revenue Analytics Dashboard
 
 An interactive, responsive admin dashboard engineered with a modern **Bento Grid** minimalist aesthetic for tracking leads, quotations, deals, orders, and realized revenue for a high-growth service agency.
 
 ## 🚀 Live Demo
-- **GitHub Pages:** [https://anasamin822-dotcom.github.io/SecureRegent_Dashboard/](https://anasamin822-dotcom.github.io/SecureRegent_Dashboard/)
+- **GitHub Pages:** [https://anasamin822-dotcom.github.io/RevenueLens/](https://anasamin822-dotcom.github.io/RevenueLens/)
 
 ---
 
@@ -66,8 +66,8 @@ No build step or Node.js environment is required.
 
 1. Clone or download the repository:
    ```bash
-   git clone https://github.com/anasamin822-dotcom/SecureRegent_Dashboard.git
-   cd SecureRegent_Dashboard
+   git clone https://github.com/anasamin822-dotcom/RevenueLens.git
+   cd RevenueLens
    ```
 2. Open `index.html` directly in any web browser, or launch a local static server:
    ```bash
@@ -83,7 +83,7 @@ No build step or Node.js environment is required.
 ## 📁 Project Structure
 
 ```text
-SecureRegent_Dashboard/
+RevenueLens/
 ├── index.html              # Main dashboard single-page shell (Bento layout, 3 views, drill-down)
 ├── 404.html                # Custom branded 404 error page
 ├── css/
