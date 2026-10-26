@@ -102,3 +102,9 @@ RevenueLens/
 
 ## 📄 License
 This project is licensed under the [MIT License](LICENSE).
+
+## Private cloud workspace
+
+RevenueLens now supports Supabase email/password private records, server validation, owner-only access and audit export. The static preview uses clearly labeled sample data until sign-in. Production schema is in `supabase/001_revenuelens.sql`; see `docs/` for scope, setup, security, design and acceptance checks. No database/service credentials belong in the frontend.
+
+Run `npm ci && npm start` for http://localhost:4318. `npm test` checks syntax. Cloud tests require private QA credentials supplied locally, never committed. Free Supabase can pause after a week of inactivity and has no automatic database backups; export business records regularly. Public email signup delivery still needs verification/configuration before claiming unrestricted onboarding.
