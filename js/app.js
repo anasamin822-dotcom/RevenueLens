@@ -5,6 +5,8 @@
 
 (function (global) {
   'use strict';
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
 
   // --- Ensure Data Layer Ready ---
   const dataLayer = global.SecureRegentData;
@@ -806,20 +808,20 @@
       }
 
       tableBody.innerHTML = filtered.map(lead => `
-        <tr data-lead-id="${lead.id}">
+        <tr data-lead-id="${esc(lead.id)}">
           <td>
             <div class="lead-name-cell">
-              <span class="lead-primary-name">${lead.name}</span>
-              <span class="lead-company-sub">${lead.id}</span>
+              <span class="lead-primary-name">${esc(lead.name)}</span>
+              <span class="lead-company-sub">${esc(lead.id)}</span>
             </div>
           </td>
-          <td><strong>${lead.company}</strong></td>
-          <td>${lead.source}</td>
-          <td>${lead.serviceInterest}</td>
-          <td><span class="status-badge badge-${lead.status.toLowerCase()}">${lead.status}</span></td>
+          <td><strong>${esc(lead.company)}</strong></td>
+          <td>${esc(lead.source)}</td>
+          <td>${esc(lead.serviceInterest)}</td>
+          <td><span class="status-badge badge-${esc(String(lead.status).toLowerCase())}">${esc(lead.status)}</span></td>
           <td>${formatDate(lead.createdAt)}</td>
           <td style="text-align: right;">
-            <button class="btn-row-action" data-lead-btn="${lead.id}">View Details →</button>
+            <button class="btn-row-action" data-lead-btn="${esc(lead.id)}">View Details →</button>
           </td>
         </tr>
       `).join('');
@@ -865,16 +867,16 @@
         const lead = LEADS.find(l => l.id === q.leadId);
         const leadName = lead ? `${lead.name} (${lead.company})` : q.leadId;
         return `
-          <tr data-lead-id="${q.leadId}">
-            <td><strong style="color: #6366f1;">${q.id}</strong></td>
-            <td>${leadName}</td>
-            <td>${q.service}</td>
-            <td>${q.category}</td>
+          <tr data-lead-id="${esc(q.leadId)}">
+            <td><strong style="color: #6366f1;">${esc(q.id)}</strong></td>
+            <td>${esc(leadName)}</td>
+            <td>${esc(q.service)}</td>
+            <td>${esc(q.category)}</td>
             <td class="cell-amount"><strong class="cell-amount">${formatCurrencyINR(q.amount)}</strong></td>
-            <td><span class="status-badge badge-${q.status.toLowerCase()}">${q.status}</span></td>
+            <td><span class="status-badge badge-${esc(String(q.status).toLowerCase())}">${esc(q.status)}</span></td>
             <td>${formatDate(q.createdAt)}</td>
             <td style="text-align: right;">
-              <button class="btn-row-action" data-lead-btn="${q.leadId}">Lead Drilldown →</button>
+              <button class="btn-row-action" data-lead-btn="${esc(q.leadId)}">Lead Drilldown →</button>
             </td>
           </tr>
         `;
@@ -921,23 +923,23 @@
         const lead = LEADS.find(l => l.id === d.leadId);
         const leadCompany = lead ? lead.company : d.leadId;
         return `
-          <tr data-lead-id="${d.leadId}">
-            <td><strong style="color: #6366f1;">${d.id}</strong></td>
-            <td>${leadCompany}</td>
-            <td>${d.service}</td>
+          <tr data-lead-id="${esc(d.leadId)}">
+            <td><strong style="color: #6366f1;">${esc(d.id)}</strong></td>
+            <td>${esc(leadCompany)}</td>
+            <td>${esc(d.service)}</td>
             <td class="cell-amount"><strong class="cell-amount">${formatCurrencyINR(d.value)}</strong></td>
-            <td><span class="priority-chip priority-${d.priority.toLowerCase()}">${d.priority}</span></td>
-            <td><span class="status-badge badge-${d.status.toLowerCase().replace(' ', '-')}">${d.status}</span></td>
+            <td><span class="priority-chip priority-${esc(String(d.priority).toLowerCase())}">${esc(d.priority)}</span></td>
+            <td><span class="status-badge badge-${esc(String(d.status).toLowerCase().replace(' ', '-'))}">${esc(d.status)}</span></td>
             <td style="min-width: 140px;">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <div class="progress-bar-bg" style="flex: 1;">
-                  <div class="progress-bar-fill ${d.status === 'Won' ? '' : 'fill-indigo'}" style="width: ${d.progress}%;"></div>
+                  <div class="progress-bar-fill ${d.status === 'Won' ? '' : 'fill-indigo'}" style="width: ${Number(d.progress) || 0}%;"></div>
                 </div>
-                <span style="font-size: 0.75rem; font-weight: 600; color: #475569;">${d.progress}%</span>
+                <span style="font-size: 0.75rem; font-weight: 600; color: #475569;">${Number(d.progress) || 0}%</span>
               </div>
             </td>
             <td style="text-align: right;">
-              <button class="btn-row-action" data-lead-btn="${d.leadId}">Lead Drilldown →</button>
+              <button class="btn-row-action" data-lead-btn="${esc(d.leadId)}">Lead Drilldown →</button>
             </td>
           </tr>
         `;
@@ -984,16 +986,16 @@
         const deal = DEALS.find(d => d.id === p.dealId);
         const leadId = deal ? deal.leadId : null;
         return `
-          <tr ${leadId ? `data-lead-id="${leadId}"` : ''}>
-            <td><strong style="color: #6366f1;">${p.id}</strong></td>
-            <td>${p.dealId}</td>
-            <td>${p.orderId || '—'}</td>
+          <tr ${leadId ? `data-lead-id="${esc(leadId)}"` : ''}>
+            <td><strong style="color: #6366f1;">${esc(p.id)}</strong></td>
+            <td>${esc(p.dealId)}</td>
+            <td>${esc(p.orderId || '—')}</td>
             <td class="cell-amount"><strong class="text-success cell-amount">${formatCurrencyINR(p.amount)}</strong></td>
-            <td>${p.method}</td>
-            <td><span class="status-badge badge-${p.status.toLowerCase()}">${p.status}</span></td>
+            <td>${esc(p.method)}</td>
+            <td><span class="status-badge badge-${esc(String(p.status).toLowerCase())}">${esc(p.status)}</span></td>
             <td>${formatDate(p.date)}</td>
             <td style="text-align: right;">
-              ${leadId ? `<button class="btn-row-action" data-lead-btn="${leadId}">Lead Drilldown →</button>` : '—'}
+              ${leadId ? `<button class="btn-row-action" data-lead-btn="${esc(leadId)}">Lead Drilldown →</button>` : '—'}
             </td>
           </tr>
         `;
