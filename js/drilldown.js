@@ -5,6 +5,8 @@
 
 (function (global) {
   'use strict';
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
 
   function initDrilldown() {
     const backdrop = document.getElementById('drilldown-backdrop');
@@ -101,11 +103,11 @@
         quotesContainer.innerHTML = quotations.map(q => `
           <div class="dd-item-card">
             <div class="dd-item-header">
-              <span class="dd-item-id">${q.id}</span>
-              <span class="status-badge badge-${q.status.toLowerCase()}">${q.status}</span>
+              <span class="dd-item-id">${esc(q.id)}</span>
+              <span class="status-badge badge-${esc(String(q.status).toLowerCase())}">${esc(q.status)}</span>
             </div>
-            <div class="dd-item-title">${q.service}</div>
-            <div class="dd-item-subtitle">${q.category} • Sent ${formatDate(q.createdAt)}</div>
+            <div class="dd-item-title">${esc(q.service)}</div>
+            <div class="dd-item-subtitle">${esc(q.category)} • Sent ${formatDate(q.createdAt)}</div>
             <div class="dd-item-amount">${formatCurrencyINR(q.amount)}</div>
           </div>
         `).join('');
@@ -122,19 +124,19 @@
           <div class="dd-item-card">
             <div class="dd-item-header">
               <div style="display:flex; align-items:center; gap:6px;">
-                <span class="dd-item-id">${d.id}</span>
-                <span class="priority-chip priority-${d.priority.toLowerCase()}">${d.priority} Priority</span>
+                <span class="dd-item-id">${esc(d.id)}</span>
+                <span class="priority-chip priority-${esc(String(d.priority).toLowerCase())}">${esc(d.priority)} Priority</span>
               </div>
-              <span class="status-badge badge-${d.status.toLowerCase().replace(' ', '-')}">${d.status}</span>
+              <span class="status-badge badge-${esc(String(d.status).toLowerCase().replace(' ', '-'))}">${esc(d.status)}</span>
             </div>
-            <div class="dd-item-title">${d.service}</div>
+            <div class="dd-item-title">${esc(d.service)}</div>
             <div class="dd-progress-wrap">
               <div class="dd-progress-label">
                 <span>Stage Progress</span>
-                <span>${d.progress}%</span>
+                <span>${Number(d.progress) || 0}%</span>
               </div>
               <div class="progress-bar-bg">
-                <div class="progress-bar-fill" style="width: ${d.progress}%;"></div>
+                <div class="progress-bar-fill" style="width: ${Number(d.progress) || 0}%;"></div>
               </div>
             </div>
             <div class="dd-item-amount">${formatCurrencyINR(d.value)}</div>
@@ -152,17 +154,17 @@
         ordersContainer.innerHTML = orders.map(o => `
           <div class="dd-item-card">
             <div class="dd-item-header">
-              <span class="dd-item-id">${o.id}</span>
-              <span class="status-badge badge-${o.status.toLowerCase().replace(' ', '-')}">${o.status}</span>
+              <span class="dd-item-id">${esc(o.id)}</span>
+              <span class="status-badge badge-${esc(String(o.status).toLowerCase().replace(' ', '-'))}">${esc(o.status)}</span>
             </div>
-            <div class="dd-item-title">${o.title}</div>
+            <div class="dd-item-title">${esc(o.title)}</div>
             <div class="dd-progress-wrap">
               <div class="dd-progress-label">
                 <span>Fulfillment</span>
-                <span>${o.progress}%</span>
+                <span>${Number(o.progress) || 0}%</span>
               </div>
               <div class="progress-bar-bg">
-                <div class="progress-bar-fill fill-indigo" style="width: ${o.progress}%;"></div>
+                <div class="progress-bar-fill fill-indigo" style="width: ${Number(o.progress) || 0}%;"></div>
               </div>
             </div>
             <div class="dd-item-amount">${formatCurrencyINR(o.amount)}</div>
@@ -180,11 +182,11 @@
         paymentsContainer.innerHTML = payments.map(p => `
           <div class="dd-item-card">
             <div class="dd-item-header">
-              <span class="dd-item-id">${p.id}</span>
-              <span class="status-badge badge-${p.status.toLowerCase()}">${p.status}</span>
+              <span class="dd-item-id">${esc(p.id)}</span>
+              <span class="status-badge badge-${esc(String(p.status).toLowerCase())}">${esc(p.status)}</span>
             </div>
-            <div class="dd-item-title">${p.method}</div>
-            <div class="dd-item-subtitle">${formatDate(p.date)} ${p.orderId ? `• Linked to ${p.orderId}` : ''}</div>
+            <div class="dd-item-title">${esc(p.method)}</div>
+            <div class="dd-item-subtitle">${formatDate(p.date)} ${p.orderId ? `• Linked to ${esc(p.orderId)}` : ''}</div>
             <div class="dd-item-amount text-success">${formatCurrencyINR(p.amount)}</div>
           </div>
         `).join('');
